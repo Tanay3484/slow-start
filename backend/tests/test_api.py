@@ -5,7 +5,6 @@ from __future__ import annotations
 import datetime as dt
 
 from conftest import FakeLLM, days
-
 from slowstart import service
 from slowstart.api import Services, create_app
 from slowstart.checkin.reader import is_excused, keyword_body, read_checkin

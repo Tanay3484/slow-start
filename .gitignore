@@ -37,3 +37,7 @@ drafts/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Regenerable evaluation cache
+results/cache/
+results/*.dryrun.*

@@ -5,7 +5,6 @@ import datetime as dt
 import numpy as np
 import pytest
 from conftest import START, days
-
 from slowstart.config import Settings
 from slowstart.controllers import policies
 from slowstart.models import Cap, StepParams

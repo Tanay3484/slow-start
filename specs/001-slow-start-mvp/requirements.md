@@ -69,7 +69,8 @@ this spec is provisional until Tanay approves it.
   no XP SHALL be removed. There SHALL be no streak.
 - R4.6 Steps SHALL raise Slumbrock's Speed and training SHALL raise its Power. Both SHALL start at half and
   reach full at the last stage.
-- R4.7 Logging a workout SHALL give bonus XP. It SHALL NOT be required to win.
+- R4.7 Logging a workout SHALL give bonus XP, even on a day the step goal was missed. It SHALL NOT be
+  required to win.
 - R4.8 The app SHALL keep a collection of every creature the person has met.
 - R4.9 The app SHALL offer a demo that replays a real person from the public dataset day by day, with no
   sign-in and no import.

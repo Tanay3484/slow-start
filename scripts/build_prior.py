@@ -9,6 +9,7 @@ The evaluation does NOT use this file (it contains the test days); it pools only
 from __future__ import annotations
 
 import csv
+import math
 import sys
 from pathlib import Path
 
@@ -27,7 +28,7 @@ def main() -> int:
     with OUT.open("w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
         writer.writerow([*FEATURES, "target"])
-        writer.writerows([["nan" if v != v else round(v, 3) for v in r] for r in rows])
+        writer.writerows([["nan" if math.isnan(v) else round(v, 3) for v in r] for r in rows])
     print(f"wrote {len(rows)} rows from {len(people)} people to {OUT}")
     return 0
 
