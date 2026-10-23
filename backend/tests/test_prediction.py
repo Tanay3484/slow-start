@@ -107,3 +107,44 @@ def test_fixed_policy_and_empty_history():
     assert policies.fixed_10k([], START) == 10_000
     assert policies.trailing_median([], START) is None
     assert policies.fallback_window([], START, PARAMS) == PARAMS.start
+
+
+# ---- feature set v2: relative to the person's own scale ----
+
+
+def test_v2_features_are_scale_free_except_the_log_scale():
+    from slowstart.prediction.features import FEATURE_SETS, FEATURES_V2
+
+    fs = FEATURE_SETS["v2"]
+    day = START + dt.timedelta(days=9)
+    a, scale_a = fs.features(steps_map(days(WEEK)), day)
+    b, scale_b = fs.features(steps_map(days([s * 2 for s in WEEK])), day)
+    assert scale_b == pytest.approx(2 * scale_a)
+    i = FEATURES_V2.index("log_scale")
+    for k, (x, y) in enumerate(zip(a, b, strict=True)):
+        if k != i:
+            assert x == pytest.approx(y, nan_ok=True)
+    assert b[i] - a[i] == pytest.approx(np.log(2))
+
+
+def test_v2_rows_use_only_the_past_and_a_ratio_target():
+    from slowstart.prediction.features import FEATURE_SETS
+
+    fs = FEATURE_SETS["v2"]
+    steps = steps_map(days(WEEK))
+    rows = fs.rows(steps)
+    assert rows
+    for day, feats, ratio, scale in rows:
+        past = {d: s for d, s in steps.items() if d < day}
+        again, scale_again = fs.features(past, day)
+        np.testing.assert_array_equal(feats, again)
+        assert scale == scale_again and ratio * scale == pytest.approx(steps[day])
+
+
+def test_v2_cap_is_multiplied_back_into_steps():
+    settings = SETTINGS.model_copy(update={"feature_set": "v2"})
+    hist = days(WEEK)
+    cap = compute_cap(hist, START + dt.timedelta(days=10), EmpiricalPredictor(), settings, PARAMS)
+    # The stand-in predicts a ratio near 1 times the person's 14-day median (about 6,900).
+    assert cap.source == "tabpfn" and 1_000 <= cap.value <= 20_000
+    assert cap.p50 > 2_000

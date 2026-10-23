@@ -43,15 +43,20 @@ def locked(fn, *args, **kwargs):
 
 def build(args) -> dict:
     params, settings = StepParams(), Settings()
-    settings = settings.model_copy(update={"tabpfn_estimators": args.n_estimators})
+    settings = settings.model_copy(
+        update={"tabpfn_estimators": args.n_estimators, "feature_set": args.features}
+    )
     people = load_fitbit(args.zip)
+    if args.until:
+        until = dt.date.fromisoformat(args.until)
+        people = {p: [d for d in days if d.date <= until] for p, days in people.items()}
     ids = {pid: f"P{i + 1:02d}" for i, pid in enumerate(sorted(people))}
     people = {ids[pid]: days for pid, days in people.items()}
     all_days = [d for days in people.values() for d in days]
     not_worn = sum(1 for d in all_days if d.steps is None)
 
     predictor = EmpiricalPredictor() if args.fake else TabPFNPredictor(args.n_estimators)
-    name = "fake" if args.fake else f"tabpfn-v2-n{args.n_estimators}"
+    name = "fake" if args.fake else f"tabpfn-v2-n{args.n_estimators}-{args.features}"
     cache = Path(args.out) / "cache" / f"caps-{name}.json"
     print(f"loaded {len(people)} people, {len(all_days)} person-days, {not_worn} not worn")
     caps = steps_eval.calendar_caps(people, predictor, settings, cache_path=cache, progress=print)
@@ -91,6 +96,8 @@ def build(args) -> dict:
         "predictor": predictor.name,
         "tabpfn_package": None if args.fake else metadata.version("tabpfn"),
         "n_estimators": args.n_estimators,
+        "features": args.features,
+        "until": args.until,
         "data": "Kaggle 'Fitbit Fitness Tracker Data' (arashnic/fitbit), CC0, 2016-03-12 to 2016-05-12",
         "people_loaded": len(people),
         "person_days_loaded": len(all_days),
@@ -121,7 +128,8 @@ def markdown(r: dict) -> str:
     lines += [
         "# Steps results",
         "",
-        f"Generated {r['generated']}. Data: {r['data']}.",
+        f"Generated {r['generated']}. Data: {r['data']}. Feature set: {r['features']}"
+        + (f", data cut at {r['until']} (validation)." if r["until"] else ", all data (final)."),
         "",
         f"- **{r['people']} people, {r['person_days']} person-days** scored: the last window starting "
         f"{r['window_start']}, only days where every policy set a goal and the person had at least 7 "
@@ -180,12 +188,15 @@ def main() -> int:
     ap.add_argument("--out", default="results")
     ap.add_argument("--window-days", type=int, default=14)
     ap.add_argument("--n-estimators", type=int, default=4)
+    ap.add_argument("--features", default="v1", choices=["v1", "v2"])
+    ap.add_argument("--until", help="drop days after this date (validation runs)")
+    ap.add_argument("--label", default="final", help="final or validation; part of the file name")
     ap.add_argument("--fake", action="store_true", help="stand-in predictor; pipeline check only")
     args = ap.parse_args()
     result = build(args)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    stem = "steps.dryrun" if args.fake else "steps"
+    stem = "steps.dryrun" if args.fake else f"steps.{args.label}-{args.features}"
     (out / f"{stem}.json").write_text(json.dumps(result, indent=2, default=str), encoding="utf-8")
     (out / f"{stem}.md").write_text(markdown(result), encoding="utf-8")
     print(markdown(result))

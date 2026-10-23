@@ -23,7 +23,7 @@ from slowstart.config import Settings
 from slowstart.controllers import policies, steps
 from slowstart.models import DayResult, StepParams
 from slowstart.prediction.cap import _round
-from slowstart.prediction.features import day_features, steps_map, training_rows
+from slowstart.prediction.features import FEATURE_SETS, steps_map
 from slowstart.prediction.predictor import Predictor
 
 log = logging.getLogger("slowstart.eval")
@@ -50,10 +50,14 @@ def calendar_caps(
     cache_path: Path | None = None,
     progress: Callable[[str], None] = lambda _: None,
 ) -> dict[tuple[str, dt.date], tuple[float, float]]:
-    """(person, day) -> (p30, p50) of that day's steps, fitted on rows from earlier days only."""
+    """(person, day) -> (p30, p50) of that day's steps, fitted on rows from earlier days only.
+
+    The feature set is `settings.feature_set`; its model predicts steps / scale, and the answer is
+    multiplied back, so the cache and the result are always in steps."""
+    fs = FEATURE_SETS[settings.feature_set]
     series = {p: steps_map(days) for p, days in people.items()}
     pool_rows = sorted(
-        ((d, feats, target) for s in series.values() for d, feats, target in training_rows(s)),
+        (row for s in series.values() for row in fs.rows(s)),
         key=lambda r: r[0],
     )
     cache: dict[str, list[float]] = {}
@@ -63,21 +67,21 @@ def calendar_caps(
     out: dict[tuple[str, dt.date], tuple[float, float]] = {}
     all_days = sorted({d.date for days in people.values() for d in days})
     for i, day in enumerate(all_days):
-        wanted: list[tuple[str, list[float]]] = []
+        wanted: list[tuple[str, list[float], float]] = []
         for p, days in people.items():
             if day not in {d.date for d in days}:
                 continue
             past = {d: s for d, s in series[p].items() if d < day}
             if len(past) < settings.cap_min_days:
                 continue
-            feats = day_features(past, day)
-            if feats is not None:
-                wanted.append((p, feats))
+            got = fs.features(past, day)
+            if got is not None:
+                wanted.append((p, got[0], got[1]))
         if not wanted:
             continue
-        keys = [f"{p}|{day.isoformat()}" for p, _ in wanted]
+        keys = [f"{p}|{day.isoformat()}" for p, _, _ in wanted]
         if all(k in cache for k in keys):
-            for (p, _), k in zip(wanted, keys, strict=True):
+            for (p, _, _), k in zip(wanted, keys, strict=True):
                 out[(p, day)] = (cache[k][0], cache[k][1])
             continue
         train = [r for r in pool_rows if r[0] < day]
@@ -87,8 +91,8 @@ def calendar_caps(
         y_train = np.array([r[2] for r in train], dtype=float)
         x_test = np.array([w[1] for w in wanted], dtype=float)
         q = predictor.quantiles(x_train, y_train, x_test, list(QUANTILES))
-        for j, ((p, _), k) in enumerate(zip(wanted, keys, strict=True)):
-            cache[k] = [float(q[0][j]), float(q[1][j])]
+        for j, ((p, _, scale), k) in enumerate(zip(wanted, keys, strict=True)):
+            cache[k] = [float(q[0][j]) * scale, float(q[1][j]) * scale]
             out[(p, day)] = (cache[k][0], cache[k][1])
         progress(f"  caps {i + 1}/{len(all_days)} {day} ({len(train)} rows, {len(wanted)} people)")
         if cache_path:

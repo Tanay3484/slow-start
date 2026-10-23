@@ -19,7 +19,7 @@ import numpy as np
 from slowstart.config import Settings
 from slowstart.controllers.policies import clamp_goal, fallback_window
 from slowstart.models import Cap, DayResult, StepParams
-from slowstart.prediction.features import FEATURES, day_features, steps_map, training_rows
+from slowstart.prediction.features import FEATURE_SETS, steps_map
 from slowstart.prediction.predictor import Predictor
 
 log = logging.getLogger("slowstart.cap")
@@ -27,16 +27,18 @@ ROUND_TO = 50
 
 
 @lru_cache
-def load_prior() -> tuple[np.ndarray, np.ndarray]:
-    """The bundled public rows (Kaggle Fitbit set, CC0, ids dropped): a cold start for new people."""
-    path = resources.files("slowstart.data").joinpath("prior_steps.csv")
+def load_prior(feature_set: str = "v1") -> tuple[np.ndarray, np.ndarray]:
+    """The bundled public rows (Kaggle Fitbit set, CC0, ids dropped): a cold start for new people.
+    Rows are in the feature set's own space, and the target is already divided by the scale."""
+    path = resources.files("slowstart.data").joinpath(f"prior_steps_{feature_set}.csv")
     rows = list(csv.reader(path.read_text(encoding="utf-8").splitlines()))
     body = np.array(rows[1:], dtype=float)
-    return body[:, : len(FEATURES)], body[:, len(FEATURES)]
+    n = len(FEATURE_SETS[feature_set].names)
+    return body[:, :n], body[:, n]
 
 
-def prior_sample(n: int, seed: int = 0) -> tuple[np.ndarray, np.ndarray]:
-    x, y = load_prior()
+def prior_sample(n: int, seed: int = 0, feature_set: str = "v1") -> tuple[np.ndarray, np.ndarray]:
+    x, y = load_prior(feature_set)
     if n >= len(x):
         return x, y
     idx = np.random.default_rng(seed).choice(len(x), size=n, replace=False)
@@ -64,15 +66,17 @@ def compute_cap(
     if predictor is None:
         return median_cap(history, today, params)
     try:
-        x_test = day_features(steps, today)
-        if x_test is None:
+        fs = FEATURE_SETS[settings.feature_set]
+        got = fs.features(steps, today)
+        if got is None:
             return median_cap(history, today, params)
-        own = training_rows(steps)
-        x_prior, y_prior = prior_sample(settings.prior_rows)
+        x_test, scale = got
+        own = fs.rows(steps)
+        x_prior, y_prior = prior_sample(settings.prior_rows, feature_set=fs.name)
         x_train = np.vstack([x_prior, np.array([r[1] for r in own])]) if own else x_prior
         y_train = np.concatenate([y_prior, np.array([r[2] for r in own])]) if own else y_prior
         q = predictor.quantiles(x_train, y_train, np.array([x_test]), [settings.cap_quantile, 0.5])
-        p30, p50 = float(q[0][0]), float(q[1][0])
+        p30, p50 = float(q[0][0]) * scale, float(q[1][0]) * scale
         return Cap(
             value=_round(p30, params),
             p30=_round(p30, params),

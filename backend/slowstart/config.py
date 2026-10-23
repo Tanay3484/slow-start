@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     prior_rows: int = 400
     tabpfn_estimators: int = 4
     use_tabpfn: bool = True
+    feature_set: str = "v1"  # v2 is chosen on a validation window; see results/
 
     # Serving the built app from the same process.
     static_dir: str = "../app/dist"

@@ -123,6 +123,13 @@ cap, at the same goal level); repeat last; fixed plan (+2.5 kg or +1 rep). Each 
   12.6 s per fit and predict, peak 584 MB. On 350 held-out person-days the p30 cap was met on 66.9% of
   days at a goal level of 0.81 of the person's median. The real comparison is against the own 30th
   percentile, in T12.
+- **Feature sets, and how one was chosen.** The first real run (`v1`, raw steps) did not beat a plain
+  "own 30th percentile of the last 28 days" at the same goal level (66.6% against 69.7% goal met). `v2`
+  expresses every feature relative to the person's 14-day median and predicts a ratio, so one pooled
+  model shares the shape of a week and leaves the scale to each person. To avoid tuning on the test
+  window, the two sets were compared on a **validation window** (data cut at 2016-04-28, scored on the 14
+  days before it), the better one was picked, and only then evaluated on the final 14 days. All four
+  runs are kept in `results/` and reported.
 - **Latency plan:** one prediction per person per day, cached in the app. `PRIOR_ROWS` is tuned so a
   call stays under about 8 s on the Render plan. The app shows "Slumbrock is waking up" while it waits.
 
