@@ -1,0 +1,39 @@
+# Python
+backend/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node / app
+node_modules/
+app/dist/
+app/android/app/build/
+app/android/build/
+app/android/.gradle/
+app/android/local.properties
+app/android/app/src/main/assets/public/
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# Data: raw downloads and anything personal stay out of the repo
+data/raw/
+data/private/
+results/private/
+
+# Secrets and local config
+.env
+.env.*
+!.env.example
+
+# Drafts of the DEV post are Tanay's to publish
+drafts/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
