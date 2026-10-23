@@ -106,22 +106,37 @@ export function rankPlaces(places: readonly Place[], k = 5): Place[] {
   return out;
 }
 
-export async function findPlaces(lat: number, lon: number, activity: Activity, maxWalkMin = 20, fetchFn: typeof fetch = fetch): Promise<Place[]> {
+const SERVER_TIMEOUT_MS = 15_000;
+
+export async function findPlaces(
+  lat: number,
+  lon: number,
+  activity: Activity,
+  maxWalkMin = 20,
+  fetchFn: typeof fetch = fetch,
+  timeoutMs = SERVER_TIMEOUT_MS,
+): Promise<Place[]> {
   const radiusM = maxWalkMin * WALK_M_PER_MIN;
   const query = buildQuery(lat, lon, activity, radiusM);
   for (const url of ENDPOINTS) {
+    // A busy map server can stall for minutes: give each one a deadline, then try the next.
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), timeoutMs);
     try {
       const res = await fetchFn(url, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `data=${encodeURIComponent(query)}`,
+        signal: ctl.signal,
       });
       if (!res.ok) continue;
       const data = (await res.json()) as { elements?: unknown };
       return rankPlaces(parseElements(data.elements, activity, lat, lon).filter((p) => p.distanceM <= radiusM));
     } catch {
       /* try the next server */
+    } finally {
+      clearTimeout(timer);
     }
   }
-  throw new Error("The map service did not answer");
+  throw new Error("The map service did not answer. Try again in a minute.");
 }

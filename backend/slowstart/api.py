@@ -7,7 +7,7 @@ import threading
 from dataclasses import dataclass
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -30,6 +30,7 @@ from slowstart.models import (
     StepGoalRequest,
 )
 from slowstart.prediction.predictor import Predictor, TabPFNPredictor
+from slowstart.ratelimit import RateLimiter, limit
 
 log = logging.getLogger("slowstart")
 
@@ -71,6 +72,9 @@ def create_app(services: Services | None = None) -> FastAPI:
         allow_headers=["*"],
     )
 
+    # The routes that cost CPU or call the model are limited per client; the cheap ones are not.
+    costly = Depends(limit(RateLimiter(svc.settings.rate_per_minute)))
+
     if isinstance(svc.predictor, TabPFNPredictor):
         # Load the weights in the background so the first goal request is not the slow one.
         threading.Thread(target=svc.predictor.warm, daemon=True).start()
@@ -84,7 +88,7 @@ def create_app(services: Services | None = None) -> FastAPI:
             "levels": guard.levels_state(),
         }
 
-    @app.post("/api/goal/steps", response_model=Goal)
+    @app.post("/api/goal/steps", response_model=Goal, dependencies=[costly])
     def goal_steps(body: StepGoalRequest) -> Goal:
         return service.step_goal(body.history, body.today, svc.predictor, svc.settings)
 
@@ -112,7 +116,7 @@ def create_app(services: Services | None = None) -> FastAPI:
         except HevyImportError as exc:
             raise HTTPException(422, str(exc)) from exc
 
-    @app.post("/api/checkin", response_model=Checkin)
+    @app.post("/api/checkin", response_model=Checkin, dependencies=[costly])
     def checkin(body: CheckinRequest) -> Checkin:
         return read_checkin(body.text, svc.llm)
 

@@ -73,7 +73,18 @@ cost and a bug they found), GitHub Copilot (coding agent, CLI, Actions), .tech (
 - Temporal winner (Fieldcast): a held-out year, two baselines, and an ablation that broke their own
   result (the forecast was a forecast of people, not butterflies), reported as the headline.
 
-## Where things stand (2026-10-23)
+## Where things stand (2026-10-23, late)
+
+Built: the app, backend, importers, evaluation (steps done; training waits for Tanay's Hevy export), Android
+debug APK, Dockerfile and Blueprint (image tested with no network). Waiting on Tanay: H1-H4, the Render
+decision (four paid services already run; see memory), making the repo public, own data exports. Not
+verified: live OpenStreetMap from this machine (Overpass answers 406 to this IP), the APK on a device.
+
+Steps evaluation finding to keep honest in the post: TabPFN's cap and the plain own-30th-percentile are
+indistinguishable on this data (validation +3.9, final -3.1 points). The feature set was picked by a rule
+written before the v2 result (see `results/steps.summary.md`).
+
+## Where things stood earlier (2026-10-23)
 
 Tanay was away on TOEFL prep until 2026-10-23 and asked for the whole build to be done by the agent, with
 four `@human` tasks left for Tanay (H1-H4 in `specs/001-slow-start-mvp/tasks.md`). The brief,
@@ -103,7 +114,14 @@ H1 step controller (`backend/slowstart/controllers/steps.py`), H2 exercise contr
 - App: `cd app && npm install && npm run dev` (Node 18: Vite 5 and Capacitor 6 only).
 - Data: the public Fitbit set is downloaded with `kaggle datasets download -d arashnic/fitbit -p data/raw/fitbit`
   (kept out of git). Tanay's own exports go in `data/private/` (also out of git).
-- Evaluation: `scripts/evaluate_steps.py`, `scripts/evaluate_training.py` (to be added, T10-T13).
+- Evaluation: `scripts/evaluate_steps.py [--features v1|v2] [--until DATE] [--label final|validation]`
+  (TabPFN predictions are cached in `results/cache/`), `scripts/summarise_steps.py` (the four-run table),
+  `scripts/evaluate_training.py <hevy.csv>` (needs Tanay's export in `data/private/`).
+- Progress on the four hand-written levels: `python scripts/levels.py`.
+- Art: `python scripts/draw_sprites.py --preview` (sprites are drawn in code; the JSON is generated).
+- Docker (Desktop must be running): `docker build -t slowstart .`; test with `--network none --memory=2g`.
+- Android: `cd app && npm run build && npx cap sync android`; then `gradlew assembleDebug` in `app/android`
+  with `JAVA_HOME` set to Android Studio's `jbr`. In PowerShell do not append `2>&1` to `java -version`.
 - Run Python that reads downloaded data with `-I`.
 
 ## Conventions

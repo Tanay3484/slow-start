@@ -129,7 +129,13 @@ cap, at the same goal level); repeat last; fixed plan (+2.5 kg or +1 rep). Each 
   model shares the shape of a week and leaves the scale to each person. To avoid tuning on the test
   window, the two sets were compared on a **validation window** (data cut at 2016-04-28, scored on the 14
   days before it), the better one was picked, and only then evaluated on the final 14 days. All four
-  runs are kept in `results/` and reported.
+  runs are kept in `results/` and reported. **Outcome** (`results/steps.summary.md`): the sign of
+  TabPFN's difference from the plain 30th percentile flipped between windows (+3.9 and +3.4 points on
+  validation for v1 and v2, -3.1 for both on the final window), so on 33 people the two are
+  indistinguishable. The rule picked v1 (68.0% against 67.5% on validation, a half-point gap); v2 is
+  reported as the alternative. TabPFN's hit rate stayed near the 70% target in both windows (68.0%,
+  66.6%) while the plain percentile's swung (64.0%, 69.7%), which is suggestive of steadier calibration
+  and nothing more, with two windows.
 - **Latency plan:** one prediction per person per day, cached in the app. `PRIOR_ROWS` is tuned so a
   call stays under about 8 s on the Render plan. The app shows "Slumbrock is waking up" while it waits.
 
@@ -211,3 +217,7 @@ None blocking.
 ## Changelog
 
 - 2026-10-23: First draft, with the TabPFN spike numbers.
+- 2026-10-23: Added the feature-set comparison and its outcome (section 6), a per-client rate limit on
+  the routes that cost CPU, and measured the container: with no network, 1 CPU and a 2 GB limit, TabPFN
+  loads in 2.9 s, a goal call takes about 5 s, and peak memory is 598 MB. The 512 MB plans cannot hold it.
+

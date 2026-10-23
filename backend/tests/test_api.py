@@ -133,3 +133,26 @@ def test_app_serves_the_built_frontend(tmp_path, settings):
     assert c.get("/assets/a.js").text == "1"
     assert c.get("/../secret").status_code in (200, 404)
     assert c.get("/api/health").json()["status"] == "ok"
+
+
+def test_costly_routes_are_rate_limited_per_client(settings):
+    from fastapi.testclient import TestClient
+
+    s = settings.model_copy(update={"rate_per_minute": 3})
+    c = TestClient(create_app(Services(settings=s, predictor=None, llm=None)))
+    body = {"today": "2026-10-02", "history": []}
+    codes = [c.post("/api/goal/steps", json=body).status_code for _ in range(5)]
+    assert codes == [200, 200, 200, 429, 429]
+    assert c.get("/api/health").status_code == 200  # cheap routes are not limited
+    other = c.post("/api/goal/steps", json=body, headers={"x-forwarded-for": "203.0.113.9"})
+    assert other.status_code == 200  # another client has its own allowance
+
+
+def test_rate_limiter_forgets_old_hits():
+    from slowstart.ratelimit import RateLimiter
+
+    now = [0.0]
+    r = RateLimiter(2, clock=lambda: now[0])
+    assert r.check("a") and r.check("a") and not r.check("a")
+    now[0] = 61.0
+    assert r.check("a")

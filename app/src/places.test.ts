@@ -62,6 +62,14 @@ describe("places (R6.1, R6.2)", () => {
     expect(ranked[0].distanceM).toBeLessThanOrEqual(ranked[1].distanceM);
   });
 
+  it("gives each server a deadline instead of waiting forever", async () => {
+    const hang = ((_url: string, init: RequestInit) =>
+      new Promise((_, reject) => init.signal?.addEventListener("abort", () => reject(new Error("aborted"))))) as unknown as typeof fetch;
+    const t = Date.now();
+    await expect(findPlaces(18.52, 73.85, "walk", 20, hang, 30)).rejects.toThrow(/did not answer/);
+    expect(Date.now() - t).toBeLessThan(2000);
+  });
+
   it("falls through dead servers and then reports failure", async () => {
     let calls = 0;
     const dead = (async () => {

@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     use_tabpfn: bool = True
     feature_set: str = "v1"  # v2 is chosen on a validation window; see results/
 
+    # Requests per minute per client for the routes that cost CPU (goal, check-in).
+    rate_per_minute: int = 30
+
     # Serving the built app from the same process.
     static_dir: str = "../app/dist"
     cors_origins: str = "*"
