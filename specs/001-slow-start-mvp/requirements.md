@@ -125,6 +125,23 @@ this spec is provisional until Tanay approves it.
 - R9.4 The README SHALL credit Golden Hour for the place code and the Kaggle dataset for the step data.
 - R9.5 Code that calls an `@human` function SHALL go through a guard and SHALL work while it is a stub.
 
+## R10 Website and motion (Draft 2, 2026-10-24)
+
+- R10.1 The site SHALL have a landing page at `/` and the game at `/play`. The Android app SHALL open the
+  game directly.
+- R10.2 The landing page SHALL tell the story by scrolling: a live pixel scene in which Slumbrock wakes
+  through all four stages, then the problem, the rules, a widget that asks the real controller for goals,
+  the evaluation result stated plainly, the creatures, the features, the open-source stack and links.
+- R10.3 Every number on the landing page SHALL come from `app/src/site/evidence.json`, which
+  `scripts/summarise_steps.py` writes from `results/`.
+- R10.4 The arena SHALL be animated: idle breathing and blinking, an entrance for each new creature, an
+  attack with a damage number for every step logged, a capture at zero HP after which the creature
+  follows Slumbrock, an evolution when the stage rises, and reactions when a character is tapped.
+- R10.5 The game SHALL lay out as one column on a phone and as two columns from 960px, with the arena
+  pinned beside every tab.
+- R10.6 WHERE the person prefers reduced motion, the site and the arena SHALL drop shakes, flashes and
+  most particles.
+
 ## Non-goals
 
 As in the brief: live Health Connect sync, routes, store listings, notifications, iOS, multiplayer,
@@ -144,3 +161,6 @@ calories, diet, sleep, medical advice.
   compares controllers and baselines without it.
 - 2026-10-23: R1.7 now allows two feature sets for the cap (`v1` raw steps, `v2` relative to the person's
   own median), chosen on a validation window before the final evaluation. See design section 6.
+- 2026-10-24: Added R10 (website and motion) at Tanay's request after PR #1: a landing page, a real
+  animation engine, a responsive game layout. Written alongside the build, like the rest of 001.
+

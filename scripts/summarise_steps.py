@@ -12,6 +12,8 @@ import sys
 from pathlib import Path
 
 RESULTS = Path("results")
+# The website quotes these numbers; it reads them from here, never from hand-typed text.
+SITE = Path("app/src/site/evidence.json")
 RUNS = [("validation", "v1"), ("validation", "v2"), ("final", "v1"), ("final", "v2")]
 
 
@@ -60,6 +62,20 @@ def main() -> int:
         diffs.append(f"{label} {fs}: {d * 100:+.1f} pts")
     lines += ["TabPFN minus the plain 30th percentile: " + "; ".join(diffs) + ".", ""]
     (RESULTS / "steps.summary.md").write_text("\n".join(lines), encoding="utf-8")
+    evidence = {}
+    for label, fs in RUNS:
+        run = load(label, fs)
+        evidence[f"{label}_{fs}"] = {
+            "person_days": run["person_days"],
+            "people": run["people"],
+            "window_start": run["window_start"],
+            "policies": {
+                k: {"goal_met": round(v["goal_met"], 4), "mean_goal": round(v["mean_goal"])}
+                for k, v in run["by"].items()
+            },
+        }
+    SITE.parent.mkdir(parents=True, exist_ok=True)
+    SITE.write_text(json.dumps(evidence, indent=1), encoding="utf-8")
     print("\n".join(lines))
     return 0
 

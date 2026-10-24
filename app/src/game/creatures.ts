@@ -14,7 +14,7 @@ export const CREATURES: Record<string, Creature> = {
   pebbit: { name: "Pebbit", habitat: "street", sprite: "pebbit", blurb: "A pebble that learned to hop. Naps in doorways." },
   lampwick: { name: "Lampwick", habitat: "street", sprite: "lampwick", blurb: "Switches on at dusk and expects company." },
   ripplet: { name: "Ripplet", habitat: "water", sprite: "ripplet", blurb: "Follows anyone who walks beside water." },
-  plateling: { name: "Plateling", habitat: "gym", sprite: "plateling", blurb: "Weighs more than it looks. Loves a clean rep." },
+  plateling: { name: "Kettlebub", habitat: "gym", sprite: "plateling", blurb: "Lifts its own little bar all day. Weighs more than it looks." },
   chalkpuff: { name: "Chalkpuff", habitat: "gym", sprite: "chalkpuff", blurb: "Appears in a cloud whenever hands get dusty." },
   wanderwisp: { name: "Wanderwisp", habitat: "rare", sprite: "wanderwisp", blurb: "Only shows up somewhere you have never been." },
   starpebble: { name: "Starpebble", habitat: "rare", sprite: "starpebble", blurb: "Fell from the sky into a place you found first." },

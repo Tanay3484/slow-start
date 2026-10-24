@@ -156,3 +156,24 @@ def test_rate_limiter_forgets_old_hits():
     assert r.check("a") and r.check("a") and not r.check("a")
     now[0] = 61.0
     assert r.check("a")
+
+
+def test_goal_without_the_cap_is_the_window_alone(client):
+    hist = days(WEEK)
+    today = hist[-1].date + dt.timedelta(days=1)
+    body = payload(hist, today) | {"use_cap": False}
+    g = client.post("/api/goal/steps", json=body).json()
+    assert g["cap"]["source"] == "none" and g["goal"] == g["window"]
+
+
+def test_play_route_serves_the_game_page(tmp_path, settings):
+    from fastapi.testclient import TestClient
+
+    (tmp_path / "index.html").write_text("landing")
+    (tmp_path / "play.html").write_text("game")
+    s = settings.model_copy(update={"static_dir": str(tmp_path)})
+    c = TestClient(create_app(Services(settings=s, predictor=None, llm=None)))
+    assert c.get("/").text == "landing"
+    assert c.get("/play").text == "game"
+    assert c.get("/play.html").text == "game"
+    assert c.get("/anything-else").text == "landing"

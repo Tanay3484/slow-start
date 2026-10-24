@@ -3,15 +3,219 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#1a1c2c" />
-    <meta name="description" content="Slow Start: goals for lazy people, set the way TCP finds its speed, with a pixel-art giant to look after." />
+    <meta name="theme-color" content="#141626" />
+    <meta name="description" content="A fitness game for lazy people. Your goal starts tiny, doubles when you win and halves when you miss, the way the internet finds its speed. Never to zero." />
+    <meta property="og:title" content="Slow Start: a fitness game that starts slow" />
+    <meta property="og:description" content="Goals set like TCP, capped by an open model, and a sleepy stone giant who wakes up as you walk." />
+    <meta property="og:image" content="./icon-512.png" />
     <link rel="icon" href="./icon-192.png" />
     <link rel="manifest" href="./manifest.webmanifest" />
-    <title>Slow Start</title>
+    <title>Slow Start: a fitness game that starts slow</title>
   </head>
-  <body>
-    <div id="app"></div>
-    <noscript>Slow Start needs JavaScript to run.</noscript>
-    <script type="module" src="/src/main.ts"></script>
+  <body class="site">
+    <a class="skip" href="#problem">Skip the story</a>
+
+    <!-- 1. The story: a pinned live scene; scrolling wakes Slumbrock up -->
+    <section class="story" id="story" aria-label="Slumbrock wakes up as you scroll">
+      <div class="story-pin">
+        <div class="scene" id="scene"></div>
+        <div class="story-text">
+          <p class="kicker">DEV Hacktoberfest 2026 · Week 3 · Slow and Steady</p>
+          <h1 class="logo">Slow<span>Start</span></h1>
+          <ol class="beats">
+            <li data-beat="0">This is <b>Slumbrock</b>. He has been asleep for a very long time.</li>
+            <li data-beat="1">Small steps wake him. Not ten thousand. <b>Fifteen hundred</b>, then a little more.</li>
+            <li data-beat="2">Win a day and tomorrow's goal <b>doubles</b>. Miss one and it <b>halves</b>. Never to zero.</li>
+            <li data-beat="3">The way the internet finds its speed. <b>Slow start. Steady wins.</b></li>
+          </ol>
+          <ol class="pips" aria-label="Slumbrock's stage">
+            <li data-pip="0">Asleep</li><li data-pip="1">Drowsy</li><li data-pip="2">Awake</li><li data-pip="3">Roaring</li>
+          </ol>
+          <div class="cta">
+            <a class="btn primary" href="./play.html?demo=1">Watch the demo</a>
+            <a class="btn" href="./play.html">Start for real</a>
+          </div>
+        </div>
+        <p class="scroll-cue" aria-hidden="true">Scroll to wake him <span>▼</span></p>
+        <div class="progress" aria-hidden="true"><i></i></div>
+      </div>
+    </section>
+
+    <main>
+      <!-- 2. The problem -->
+      <section class="sec" id="problem">
+        <div class="wrap two">
+          <div class="reveal">
+            <p class="eyebrow">The problem</p>
+            <h2>10,000 steps is someone else's goal</h2>
+            <p class="lead">
+              On real wearable data, <span data-ev="final_v1.people"></span> people wearing Fitbits for two months, a fixed
+              10,000-step goal was met on <b class="hl" data-ev="final_v1.policies.fixed_10000.goal_met" data-fmt="pct">…</b>
+              of days.
+            </p>
+            <p>Missing your goal two days out of three is not motivation. It is how people quit. Slow Start gives you a goal you can actually win, then moves it with you.</p>
+          </div>
+          <figure class="waffle-card reveal" aria-label="One square per day in a hundred; lit squares are days a fixed 10,000-step goal was met">
+            <div class="waffle" id="waffle"></div>
+            <figcaption>Each square is one day in a hundred. Lit: the 10,000-step goal was met.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 3. The rules -->
+      <section class="sec alt" id="rules">
+        <div class="wrap">
+          <div class="reveal center">
+            <p class="eyebrow">How it works</p>
+            <h2>Four rules, borrowed from the internet</h2>
+            <p class="lead narrow">
+              Your phone does not know how fast it can send data, so TCP starts slowly, speeds up while things go well,
+              and backs off when something is lost. Slow Start does the same with your steps.
+            </p>
+          </div>
+          <div class="rules">
+            <article class="rule reveal"><span class="num">1</span><h3>Start tiny</h3><p>Day one asks for 1,500 steps. Anyone can win that, which is the point.</p></article>
+            <article class="rule reveal"><span class="num">2</span><h3>Win, and it doubles</h3><p>Every win doubles tomorrow's goal until the first miss tells it where your level is.</p></article>
+            <article class="rule reveal"><span class="num">3</span><h3>Near your level, it creeps</h3><p>After that it grows by a small step per win. Slow and steady, like a sloth with a plan.</p></article>
+            <article class="rule reveal"><span class="num">4</span><h3>Miss, and it halves</h3><p>Never to zero, never a lost streak. A smaller goal tomorrow, and the giant is still there.</p></article>
+          </div>
+          <figure class="sawtooth reveal">
+            <svg viewBox="0 0 600 170" role="img" aria-label="An illustration of the goal over time: it doubles, overshoots, halves, then grows slowly">
+              <defs>
+                <linearGradient id="fill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ffcd75" stop-opacity="0.35" /><stop offset="1" stop-color="#ffcd75" stop-opacity="0" /></linearGradient>
+              </defs>
+              <path class="area" d="M20,150 L80,140 L140,120 L200,80 L230,20 L232,95 L290,88 L350,80 L410,72 L440,66 L442,115 L500,108 L560,100 L580,96 L580,160 L20,160 Z" fill="url(#fill)" />
+              <path class="line" d="M20,150 L80,140 L140,120 L200,80 L230,20 L232,95 L290,88 L350,80 L410,72 L440,66 L442,115 L500,108 L560,100 L580,96" />
+              <text x="60" y="166">slow start</text><text x="300" y="166">cruising</text><text x="234" y="20">miss: halve</text><text x="446" y="140">miss: halve</text>
+            </svg>
+            <figcaption>An illustration of the shape, not data. The real line is drawn by the controller below.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 4. Try it -->
+      <section class="sec" id="try">
+        <div class="wrap two">
+          <div class="reveal">
+            <p class="eyebrow">Try the controller</p>
+            <h2>Win a few days. Miss one. Watch it adapt.</h2>
+            <p>This asks the real server for each goal. The controller is one of four core functions written by hand for this project; while one of them is still being written, a plain stand-in answers and the widget says so.</p>
+            <p class="small">Days here are pretend: every button adds one day.</p>
+          </div>
+          <div class="try card reveal" id="try-box">
+            <div class="try-head">
+              <div><span class="label">Tomorrow's goal</span><b id="try-goal">1,500</b></div>
+              <span class="chip slow_start" id="try-phase">Slow start</span>
+            </div>
+            <svg id="try-chart" viewBox="0 0 300 120" role="img" aria-label="Goal per pretend day"></svg>
+            <div class="row">
+              <button class="btn primary" data-act="win">Walk it ✓</button>
+              <button class="btn" data-act="miss">Miss it ✗</button>
+              <button class="btn" data-act="rest">Sick day</button>
+              <button class="btn ghost" data-act="reset">Reset</button>
+            </div>
+            <p class="small" id="try-note" role="status"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. The cap and the honest numbers -->
+      <section class="sec alt" id="cap">
+        <div class="wrap two">
+          <div class="reveal">
+            <p class="eyebrow">The second limit</p>
+            <h2>Some days are just slower</h2>
+            <p>TCP has two limits: how fast the sender wants to go, and how much the receiver says it can take. Slow Start has two as well. The rules above are the first. The second is <b>TabPFN</b>, an open tabular foundation model, which reads your last weeks and predicts a level you will reach about 7 days in 10. Your goal is the lower of the two.</p>
+            <p>We tested whether that prediction beats something simple, on held-out days it never saw. On this data, it does not: it is a tie with a plain "your own 30th percentile" rule. We say so here and in the write-up.</p>
+          </div>
+          <div class="card evidence reveal">
+            <h3>Goal met, on days the models never saw</h3>
+            <table>
+              <thead><tr><th>Goal</th><th>Validation</th><th>Final</th><th>Mean goal</th></tr></thead>
+              <tbody id="ev-rows"></tbody>
+            </table>
+            <p class="small" id="ev-note"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. The creatures -->
+      <section class="sec" id="creatures">
+        <div class="wrap">
+          <div class="reveal center">
+            <p class="eyebrow">The game</p>
+            <h2>Every day, a creature blocks the path</h2>
+            <p class="lead narrow">Its health is your goal. Every step you log is a hit. Catch it and it follows Slumbrock home. Parks, waterfronts, streets and gyms each have their own, and somewhere new brings a rare one.</p>
+          </div>
+          <div class="creature-grid" id="creature-grid"></div>
+        </div>
+      </section>
+
+      <!-- 7. Lazy by design -->
+      <section class="sec alt" id="lazy">
+        <div class="wrap">
+          <div class="reveal center">
+            <p class="eyebrow">Made for lazy people</p>
+            <h2>The laziest fitness app we could build</h2>
+          </div>
+          <div class="features">
+            <article class="feature reveal"><h3>You decide nothing</h3><p>The goal arrives every morning. Weights and reps too, if you lift. You just walk.</p></article>
+            <article class="feature reveal"><h3>Walking is enough</h3><p>No gym, no problem. An evening walk raises Slumbrock just as well. Built with parents in mind.</p></article>
+            <article class="feature reveal"><h3>Sick? Excused.</h3><p>Tell Slumbrock you are unwell and the day is excused. Nothing is cut. Code decides that, not the model.</p></article>
+            <article class="feature reveal"><h3>Go somewhere new</h3><p>Log from a place you have never logged from and a rare creature turns up. Your location stays on your phone.</p></article>
+            <article class="feature reveal"><h3>It talks back</h3><p>Gemma, an open model, reads a one-line check-in and answers as the giant. It never sets a number.</p></article>
+            <article class="feature reveal"><h3>Your data stays yours</h3><p>No account. Everything is saved on your device. The server processes each request and keeps nothing.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. Open source -->
+      <section class="sec" id="open">
+        <div class="wrap two">
+          <div class="reveal">
+            <p class="eyebrow">Why open</p>
+            <h2>Open models, on hardware we run</h2>
+            <ul class="ticks">
+              <li><b>Health data never goes to a closed AI service.</b> Your steps and check-ins reach only our own server, which keeps nothing.</li>
+              <li><b>No price per call.</b> TabPFN v2 runs on a plain CPU; a goal costs about five seconds of it.</li>
+              <li><b>Swappable.</b> The predictor and the language model sit behind small interfaces; changing either is one setting.</li>
+              <li><b>Checkable.</b> The weights, the data and the evaluation script are public, so anyone can rerun the numbers above.</li>
+            </ul>
+          </div>
+          <div class="stack reveal">
+            <div class="badge"><b>TabPFN v2</b><span>Prior Labs · Apache 2.0 · predicts the cap</span></div>
+            <div class="badge"><b>Gemma 3</b><span>Google · via Ollama · reads check-ins</span></div>
+            <div class="badge"><b>FastAPI</b><span>Python · the controllers and the API</span></div>
+            <div class="badge"><b>Capacitor</b><span>the same game as an Android app</span></div>
+            <div class="badge"><b>Render</b><span>where the server and the model run</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. Get it -->
+      <section class="sec alt" id="get">
+        <div class="wrap">
+          <div class="reveal center">
+            <p class="eyebrow">Play</p>
+            <h2>Wake him up</h2>
+          </div>
+          <div class="get">
+            <a class="get-card reveal" href="./play.html?demo=1"><b>Watch the demo</b><span>One real person's 40 days from a public dataset, a day per tap.</span></a>
+            <a class="get-card reveal primary" href="./play.html"><b>Play in your browser</b><span>No account. Works on a phone. Your data stays on it.</span></a>
+            <a class="get-card reveal" href="https://github.com/Tanay3484/slow-start/releases/latest"><b>Android app</b><span>The same game as an APK, installed by hand.</span></a>
+            <a class="get-card reveal" href="https://github.com/Tanay3484/slow-start"><b>Source code</b><span>MIT licensed. Specs, tests and the evaluation included.</span></a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <div class="wrap">
+        <p>Slow Start · built for the DEV Hacktoberfest 2026 Open-Source AI Challenge, Week 3: <i>Slow and Steady</i>.</p>
+        <p class="small">All art is original pixel art drawn in code. The idea comes from a monster whose ability, also called Slow Start, halves its stats for its first five turns; nothing here is taken from Pokémon or Nintendo. Step data in the demo and the evaluation: Kaggle "Fitbit Fitness Tracker Data" (CC0). Place search adapted from Golden Hour. MIT licence.</p>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/site/main.ts"></script>
   </body>
 </html>

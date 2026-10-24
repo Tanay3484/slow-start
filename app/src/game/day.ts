@@ -90,9 +90,9 @@ export function dayOf(state: State, date: string): DayRecord | undefined {
 }
 
 /** Make sure `date` has a record and every earlier day has its final outcome. */
-export function settle(state: State, today: string): State {
+export function settle(state: State, today: string, habitat: Habitat = "park"): State {
   let days = state.days.map((d) => withOutcome(d, today));
-  if (!days.some((d) => d.date === today)) days = [...days, emptyDay(today)];
+  if (!days.some((d) => d.date === today)) days = [...days, emptyDay(today, habitat)];
   days = days.sort((a, b) => a.date.localeCompare(b.date));
   return { ...state, days };
 }

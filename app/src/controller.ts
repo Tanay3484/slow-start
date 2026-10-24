@@ -10,7 +10,7 @@ import { getPosition } from "./geo";
 import { findPlaces } from "./places";
 import type { Place } from "./types";
 import { loadState, newState, savedMode, Store } from "./state";
-import type { DayRecord, ExerciseGoal, ExerciseInfo, SetLog, State } from "./types";
+import type { DayRecord, ExerciseGoal, ExerciseInfo, Habitat, SetLog, State } from "./types";
 
 export type Tab = "today" | "talk" | "places" | "dex" | "data";
 export type Say = { text: string; kind: "info" | "good" | "bad" } | null;
@@ -18,6 +18,9 @@ export type Say = { text: string; kind: "info" | "good" | "bad" } | null;
 const PERSONA = persona.days as { date: string; steps: number | null }[];
 const WELCOME_KEY = "slowstart.welcomed";
 const NEAR_M = 400; // how close you must be to a place to log from it
+// The demo walks through every kind of place and time of day, so a first-time visitor sees them all.
+const DEMO_HABITATS: Habitat[] = ["park", "water", "street", "park", "gym", "water", "street"];
+const DEMO_HOURS = [10, 18, 21, 7, 13, 19, 22];
 
 export class Controller {
   readonly store: Store;
@@ -97,7 +100,7 @@ export class Controller {
 
   /** Called once at start, and again whenever the mode or the date changes. */
   async boot(): Promise<void> {
-    this.store.set((s) => settle(s, this.date));
+    this.store.set((s) => settle(s, this.date, this.isDemo ? DEMO_HABITATS[s.demoIndex % DEMO_HABITATS.length] : "park"));
     void api.health().then((h) => { this.health = h; this.onChange(); }).catch(() => {});
     void api.exercises().then((c) => { this.catalog = c; this.onChange(); }).catch(() => {});
     await this.ensureGoal();
@@ -161,7 +164,8 @@ export class Controller {
 
   async nextDemoDay(): Promise<void> {
     const next = PERSONA[this.s.demoIndex + 1]?.date ?? addDays(this.date, 1);
-    this.store.set((s) => ({ ...settle(s, next), demoIndex: s.demoIndex + 1 }));
+    const habitat = DEMO_HABITATS[(this.s.demoIndex + 1) % DEMO_HABITATS.length];
+    this.store.set((s) => ({ ...settle(s, next, habitat), demoIndex: s.demoIndex + 1 }));
     if (this.demoOver) return this.onChange();
     this.notify(null);
     await this.boot();
@@ -320,12 +324,26 @@ export class Controller {
     const day = this.day;
     const c = CREATURES[day.creature] ?? CREATURES.mossling;
     const goal = day.goal ?? 1;
+    const left = Math.max(0, goal - (day.steps ?? 0));
+    const earlier = this.s.days
+      .filter((d) => d.date < this.date && d.outcome === "win")
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .map((d) => CREATURES[d.creature]?.sprite)
+      .filter((x): x is string => Boolean(x));
+    const caught = day.goal !== null && day.outcome === "win";
+    const companions = [...new Set([...(caught ? [c.sprite] : []), ...earlier])];
     this.arena.update({
+      day: `${this.s.mode}|${day.date}`,
       stage: stageOf(this.xp),
       creature: c.sprite,
+      creatureName: c.name,
       habitat: c.habitat,
-      hp: day.goal === null ? 1 : Math.max(0, goal - (day.steps ?? 0)) / goal,
-      hour: this.isDemo ? 10 : new Date().getHours(),
+      hp: day.goal === null ? 1 : left / goal,
+      hpSteps: day.goal === null ? 1 : left,
+      goal: day.goal ?? 0,
+      hour: this.isDemo ? DEMO_HOURS[this.s.demoIndex % DEMO_HOURS.length] : new Date().getHours(),
+      caught,
+      companions,
     });
   }
 }

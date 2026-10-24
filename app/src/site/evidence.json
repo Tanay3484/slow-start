@@ -1,0 +1,94 @@
+{
+ "validation_v1": {
+  "person_days": 406,
+  "people": 33,
+  "window_start": "2016-04-15",
+  "policies": {
+   "fixed_10000": {
+    "goal_met": 0.3621,
+    "mean_goal": 10000
+   },
+   "trailing_median_28d": {
+    "goal_met": 0.5394,
+    "mean_goal": 8369
+   },
+   "own_p30_28d": {
+    "goal_met": 0.6404,
+    "mean_goal": 7009
+   },
+   "tabpfn_p30_cap": {
+    "goal_met": 0.6798,
+    "mean_goal": 6809
+   }
+  }
+ },
+ "validation_v2": {
+  "person_days": 406,
+  "people": 33,
+  "window_start": "2016-04-15",
+  "policies": {
+   "fixed_10000": {
+    "goal_met": 0.3621,
+    "mean_goal": 10000
+   },
+   "trailing_median_28d": {
+    "goal_met": 0.5394,
+    "mean_goal": 8369
+   },
+   "own_p30_28d": {
+    "goal_met": 0.6404,
+    "mean_goal": 7009
+   },
+   "tabpfn_p30_cap": {
+    "goal_met": 0.6749,
+    "mean_goal": 6996
+   }
+  }
+ },
+ "final_v1": {
+  "person_days": 350,
+  "people": 32,
+  "window_start": "2016-04-29",
+  "policies": {
+   "fixed_10000": {
+    "goal_met": 0.3457,
+    "mean_goal": 10000
+   },
+   "trailing_median_28d": {
+    "goal_met": 0.4629,
+    "mean_goal": 8536
+   },
+   "own_p30_28d": {
+    "goal_met": 0.6971,
+    "mean_goal": 6798
+   },
+   "tabpfn_p30_cap": {
+    "goal_met": 0.6657,
+    "mean_goal": 6860
+   }
+  }
+ },
+ "final_v2": {
+  "person_days": 350,
+  "people": 32,
+  "window_start": "2016-04-29",
+  "policies": {
+   "fixed_10000": {
+    "goal_met": 0.3457,
+    "mean_goal": 10000
+   },
+   "trailing_median_28d": {
+    "goal_met": 0.4629,
+    "mean_goal": 8536
+   },
+   "own_p30_28d": {
+    "goal_met": 0.6971,
+    "mean_goal": 6798
+   },
+   "tabpfn_p30_cap": {
+    "goal_met": 0.6657,
+    "mean_goal": 6947
+   }
+  }
+ }
+}

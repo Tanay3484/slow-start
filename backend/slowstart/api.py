@@ -90,7 +90,10 @@ def create_app(services: Services | None = None) -> FastAPI:
 
     @app.post("/api/goal/steps", response_model=Goal, dependencies=[costly])
     def goal_steps(body: StepGoalRequest) -> Goal:
-        return service.step_goal(body.history, body.today, svc.predictor, svc.settings)
+        predictor = svc.predictor if body.use_cap else None
+        return service.step_goal(
+            body.history, body.today, predictor, svc.settings, use_cap=body.use_cap
+        )
 
     @app.post("/api/goal/exercise", response_model=ExerciseGoal)
     def goal_exercise(body: ExerciseGoalRequest) -> ExerciseGoal:
@@ -130,7 +133,10 @@ def create_app(services: Services | None = None) -> FastAPI:
             candidate = (static / path).resolve()
             if path and candidate.is_file() and static.resolve() in candidate.parents:
                 return FileResponse(candidate, headers={"Cache-Control": "no-cache"})
-            return FileResponse(static / "index.html", headers={"Cache-Control": "no-cache"})
+            page = "play.html" if path.strip("/").startswith("play") else "index.html"
+            if not (static / page).is_file():
+                page = "index.html"
+            return FileResponse(static / page, headers={"Cache-Control": "no-cache"})
 
     return app
 

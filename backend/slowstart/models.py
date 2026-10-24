@@ -118,6 +118,8 @@ DEFAULT_SCHEME: dict[str, ExerciseSpec] = {
 class StepGoalRequest(BaseModel):
     today: dt.date
     history: list[DayResult] = Field(default_factory=list, max_length=800)
+    # False: the controller's window alone, no cap. The website's "try the controller" uses it.
+    use_cap: bool = True
 
 
 class ExerciseGoalRequest(BaseModel):
