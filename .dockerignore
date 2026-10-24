@@ -1,0 +1,12 @@
+.git
+.github
+**/.venv
+**/__pycache__
+**/node_modules
+app/dist
+app/android
+data
+results
+drafts
+specs
+*.md

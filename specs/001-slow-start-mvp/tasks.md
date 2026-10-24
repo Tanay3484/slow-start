@@ -117,9 +117,10 @@ identical policies give `(0.0, 0.0, 0.0)`; `n` small.
 
 File: `app/src/game/xp.ts` · Functions: `xpForDay(d) -> number` and `stageForXp(xp) -> 0 | 1 | 2 | 3`
 
-- `xpForDay({ goal, steps, trained, explored })`: your design. Contract: never negative; a missed day
-  gives 0 (nothing is taken away); a won day gives more than a missed one; more steps never give less XP;
-  training and exploring each add XP; the result is a whole number.
+- `xpForDay({ goal, steps, trained, explored })`: your design. Contract: never negative; a missed step
+  day earns no step XP (nothing is taken away), but training and exploring still earn theirs; a won day
+  gives more than a missed one; more steps never give less XP; training and exploring each add XP; the
+  result is a whole number. `steps` is `null` when nothing was logged.
 - `stageForXp(xp)`: stage 0 asleep, 1 drowsy, 2 awake, 3 roaring. Thresholds are yours; they must be
   increasing, and a person who wins every day should reach stage 3 in about three weeks.
 
@@ -127,35 +128,35 @@ File: `app/src/game/xp.ts` · Functions: `xpForDay(d) -> number` and `stageForXp
 
 ## Setup
 
-- [ ] T1 `@ai` Repo scaffold: licence, gitignore, README, CI job named `tests`, pyproject, lint config. R9.3
-- [ ] T2 `@ai` Specs 000 and 001 drafted. (this file)
+- [x] T1 `@ai` Repo scaffold: licence, gitignore, README, CI job named `tests`, pyproject, lint config. R9.3
+- [x] T2 `@ai` Specs 000 and 001 drafted. (this file)
 
 ## Backend
 
-- [ ] T3 `@ai` Settings (`SS_`), models, error types. R9.3
-- [ ] T4 `@ai` Steps importers: Takeout, `date,steps` CSV, Fitabase. R3.1, R3.3
-- [ ] T5 `@ai` Hevy CSV importer with summary. R3.2
-- [ ] T6 `@ai` Baseline policies and the guard around the `@human` stubs. R1.8, R2.5, R9.5
-- [ ] T7 `@ai` Features, `Predictor` protocol, TabPFN v2 predictor, cap. R1.7–R1.9, R9.1
-- [ ] T8 `@ai` API: health, goal/steps, goal/exercise, import/steps, import/hevy. R1, R2, R3.4
-- [ ] T9 `@ai` Check-in: Ollama client, schema, keyword reader, templates. R5
-- [ ] T10 `@ai` `scripts/evaluate_steps.py`, cache, no-look-ahead test. R8.1, R8.3, R8.4
+- [x] T3 `@ai` Settings (`SS_`), models, error types. R9.3
+- [x] T4 `@ai` Steps importers: Takeout, `date,steps` CSV, Fitabase. R3.1, R3.3
+- [x] T5 `@ai` Hevy CSV importer with summary. R3.2
+- [x] T6 `@ai` Baseline policies and the guard around the `@human` stubs. R1.8, R2.5, R9.5
+- [x] T7 `@ai` Features, `Predictor` protocol, TabPFN v2 predictor, cap. R1.7–R1.9, R9.1
+- [x] T8 `@ai` API: health, goal/steps, goal/exercise, import/steps, import/hevy. R1, R2, R3.4
+- [x] T9 `@ai` Check-in: Ollama client, schema, keyword reader, templates. R5
+- [x] T10 `@ai` `scripts/evaluate_steps.py`, cache, no-look-ahead test. R8.1, R8.3, R8.4
 - [ ] T11 `@ai` Tune `PRIOR_ROWS` and `n_estimators` for latency. Design §6
 - [ ] T12 `@ai` Run the steps evaluation, write `results/steps.md`. R8.1, R8.5 (needs H1, H3 for the
   controller rows)
 - [ ] T13 `@ai` `scripts/evaluate_training.py` for a Hevy CSV. R8.2 (needs H2 and Tanay's export)
-- [ ] T14 `@ai` Contract tests for H1–H3. `@human` tasks above
+- [x] T14 `@ai` Contract tests for H1–H3. `@human` tasks above
 
 ## App
 
-- [ ] T15 `@ai` App scaffold: Vite, TypeScript, Vitest, state store, API client with fallback. R7
-- [ ] T16 `@ai` Pixel art: Slumbrock ×4, wild creatures, rare ones, backgrounds. R4.10
-- [ ] T17 `@ai` Game loop and Home screen: spawn, HP, win/miss, stages, Speed/Power. R4
-- [ ] T18 `@ai` Check-in screen. R5
-- [ ] T19 `@ai` Demo mode with a real person from the public data. R4.9
-- [ ] T20 `@ai` Places and explore bonus, ported from Golden Hour. R6
-- [ ] T21 `@ai` Import, export and delete screens. R3, R7.3
-- [ ] T22 `@ai` Contract tests for H4 and app logic. R4
+- [x] T15 `@ai` App scaffold: Vite, TypeScript, Vitest, state store, API client with fallback. R7
+- [x] T16 `@ai` Pixel art: Slumbrock ×4, wild creatures, rare ones, backgrounds. R4.10
+- [x] T17 `@ai` Game loop and Home screen: spawn, HP, win/miss, stages, Speed/Power. R4
+- [x] T18 `@ai` Check-in screen. R5
+- [x] T19 `@ai` Demo mode with a real person from the public data. R4.9
+- [x] T20 `@ai` Places and explore bonus, ported from Golden Hour. R6
+- [x] T21 `@ai` Import, export and delete screens. R3, R7.3
+- [x] T22 `@ai` Contract tests for H4 and app logic. R4
 
 ## Ship
 

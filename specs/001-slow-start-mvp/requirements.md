@@ -45,8 +45,8 @@ this spec is provisional until Tanay approves it.
 - R2.4 WHEN a session misses its target, the controller SHALL cut it: the load by about 10%, or the reps by
   about 20% for bodyweight, rounded to the equipment's increment.
 - R2.5 Training SHALL be optional. Skipping it SHALL cost no XP and SHALL NOT change a step goal.
-- R2.6 WHERE a person has at least 20 past sessions of an exercise, the system SHOULD show the predictor's
-  chance of completing the target.
+- R2.6 (deferred, see Changelog) WHERE a person has at least 20 past sessions of an exercise, the system
+  SHOULD show the predictor's chance of completing the target.
 
 ## R3 Import
 
@@ -69,7 +69,8 @@ this spec is provisional until Tanay approves it.
   no XP SHALL be removed. There SHALL be no streak.
 - R4.6 Steps SHALL raise Slumbrock's Speed and training SHALL raise its Power. Both SHALL start at half and
   reach full at the last stage.
-- R4.7 Logging a workout SHALL give bonus XP. It SHALL NOT be required to win.
+- R4.7 Logging a workout SHALL give bonus XP, even on a day the step goal was missed. It SHALL NOT be
+  required to win.
 - R4.8 The app SHALL keep a collection of every creature the person has met.
 - R4.9 The app SHALL offer a demo that replays a real person from the public dataset day by day, with no
   sign-in and no import.
@@ -138,3 +139,8 @@ calories, diet, sleep, medical advice.
 ## Changelog
 
 - 2026-10-23: First draft, written alongside the build at Tanay's request.
+- 2026-10-23: R2.6 deferred. A dozen exercises with a few dozen sessions each is too little to fit a
+  predictor per exercise and claim anything; TabPFN is used for steps only. The training claim (R8.2)
+  compares controllers and baselines without it.
+- 2026-10-23: R1.7 now allows two feature sets for the cap (`v1` raw steps, `v2` relative to the person's
+  own median), chosen on a validation window before the final evaluation. See design section 6.

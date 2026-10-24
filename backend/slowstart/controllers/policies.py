@@ -104,14 +104,15 @@ def repeat_last(sessions: Sequence[Session], exercise: str, params: ExercisePara
 
 
 def fixed_plan(sessions: Sequence[Session], exercise: str, params: ExerciseParams) -> Target:
-    """Baseline: add one step every session whatever happened (linear progression)."""
+    """Baseline: always add one step to what you did last time, whatever happened (+2.5 kg, or +1 rep)."""
     spec = params.scheme[exercise]
-    ordered = sorted(sessions, key=lambda s: s.date)
-    if not ordered:
-        return Target(sets=spec.sets, reps=spec.reps, weight_kg=spec.starter_weight_kg)
-    first, n = ordered[0], len(ordered)
+    base = repeat_last(sessions, exercise, params)
+    if not sessions:
+        return base
     if spec.kind == "bodyweight":
-        reps = best_reps(first, spec.sets)
-        return Target(sets=spec.sets, reps=max(1, (min(reps) if reps else spec.reps) + n))
-    start = top_weight(first) or spec.starter_weight_kg or 0.0
-    return Target(sets=spec.sets, reps=spec.reps, weight_kg=start + (spec.increment_kg or 0.0) * n)
+        return Target(sets=base.sets, reps=base.reps + 1)
+    return Target(
+        sets=base.sets,
+        reps=base.reps,
+        weight_kg=(base.weight_kg or 0.0) + (spec.increment_kg or 0.0),
+    )

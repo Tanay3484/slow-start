@@ -4,7 +4,6 @@ import datetime as dt
 import json
 
 import pytest
-
 from slowstart.data.hevy_import import HevyImportError, canonical_exercise, parse_hevy
 from slowstart.data.steps_import import ImportError_, parse_steps, people_in_fitabase
 

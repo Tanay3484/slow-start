@@ -10,7 +10,6 @@ import datetime as dt
 import math
 
 import pytest
-
 from slowstart.controllers.exercise import next_target
 from slowstart.controllers.steps import next_window
 from slowstart.evaluation.stats import goal_level, paired_bootstrap

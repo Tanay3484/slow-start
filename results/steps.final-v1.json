@@ -1,0 +1,61 @@
+{
+  "generated": "2026-10-23",
+  "dry_run": false,
+  "predictor": "tabpfn-v2",
+  "tabpfn_package": "9.2.0",
+  "n_estimators": 4,
+  "features": "v1",
+  "until": null,
+  "data": "Kaggle 'Fitbit Fitness Tracker Data' (arashnic/fitbit), CC0, 2016-03-12 to 2016-05-12",
+  "people_loaded": 35,
+  "person_days_loaded": 1373,
+  "not_worn_excluded": 133,
+  "controller_written": false,
+  "params": {
+    "start": 1500,
+    "floor": 1000,
+    "ceiling": 20000,
+    "ai": 250
+  },
+  "window_start": "2016-04-29",
+  "person_days": 350,
+  "people": 32,
+  "rows": [
+    {
+      "policy": "fixed_10000",
+      "label": "Fixed 10,000",
+      "goal_met": 0.3457142857142857,
+      "mean_goal": 10000.0,
+      "goal_level": null,
+      "vs_baseline": null
+    },
+    {
+      "policy": "trailing_median_28d",
+      "label": "Own 28-day median",
+      "goal_met": 0.46285714285714286,
+      "mean_goal": 8536.494285714285,
+      "goal_level": null,
+      "vs_baseline": null
+    },
+    {
+      "policy": "own_p30_28d",
+      "label": "Own 28-day 30th percentile",
+      "goal_met": 0.6971428571428572,
+      "mean_goal": 6797.768571428572,
+      "goal_level": null,
+      "vs_baseline": null
+    },
+    {
+      "policy": "tabpfn_p30_cap",
+      "label": "TabPFN 30th percentile (cap alone)",
+      "goal_met": 0.6657142857142857,
+      "mean_goal": 6859.714285714285,
+      "goal_level": null,
+      "vs_baseline": null
+    }
+  ],
+  "cap_calibration": {
+    "tabpfn_p30_cap": 0.6657142857142857,
+    "own_p30_28d": 0.6971428571428572
+  }
+}

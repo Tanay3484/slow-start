@@ -4,7 +4,6 @@ import datetime as dt
 
 import pytest
 from fastapi.testclient import TestClient
-
 from slowstart.api import Services, create_app
 from slowstart.checkin.ollama import LLMError
 from slowstart.config import Settings
