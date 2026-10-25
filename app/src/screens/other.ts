@@ -3,7 +3,6 @@ import type { Controller } from "../controller";
 import { h } from "../dom";
 import { ALL_IDS, CREATURES, HABITAT_LABEL } from "../game/creatures";
 import { xpRuleWritten } from "../game/rules";
-import { type ImportReport, issueUrl } from "../issue";
 
 // ---------------------------------------------------------------- Talk
 
@@ -99,82 +98,24 @@ export function dexScreen(c: Controller): HTMLElement {
 
 // ---------------------------------------------------------------- Data
 
-async function readFiles(input: HTMLInputElement): Promise<string[]> {
-  return Promise.all([...(input.files ?? [])].map((f) => f.text()));
-}
-
 export function dataScreen(c: Controller): HTMLElement {
   const root = h("div", { class: "screen" });
   const out = h("p", { class: "say info", role: "status" });
   out.hidden = true;
-  const issue = h("a", { target: "_blank", rel: "noopener" }, "Raise an issue on GitHub");
-  const help = h("p", { class: "meta issue-help" }, "Not sure, or the wrong numbers showing? ", issue, " and we will teach the cleaner your case. Only the file name and the message above go in; never the file.");
-  help.hidden = true;
-  const paint = (note: NonNullable<Controller["importNote"]>) => {
+  const show = (text: string, kind: "info" | "good" | "bad" = "info") => {
     out.hidden = false;
-    out.className = `say ${note.kind}`;
-    out.textContent = note.text;
-    help.hidden = !note.report;
-    if (note.report) issue.setAttribute("href", issueUrl({ ...note.report, said: note.text }));
+    out.className = `say ${kind}`;
+    out.textContent = text;
   };
-  const show = (text: string, kind: "info" | "good" | "bad" = "info", report?: Omit<ImportReport, "said">) => {
-    c.importNote = { text, kind, report };
-    paint(c.importNote);
-    if (!root.isConnected) c.onChange(); // an import redraws the screen; draw the new one with the note
-  };
-  if (c.importNote) paint(c.importNote);
-  const names = (input: HTMLInputElement) => [...(input.files ?? [])].map((f) => f.name);
-
-  const stepsFile = h("input", { type: "file", accept: ".json,.csv,.txt", multiple: true, "aria-label": "Step files" });
-  const hevyFile = h("input", { type: "file", accept: ".csv", "aria-label": "Hevy export" });
 
   root.append(
     h("section", { class: "card" },
       h("h2", {}, c.isDemo ? "Demo mode" : "Your data"),
-      h("p", { class: "meta" }, c.isDemo ? "You are watching one real person from a public dataset. Nothing here is yours." : "Everything is stored on this device only. The server processes an import in memory and keeps nothing."),
-      h("button", { class: "btn", onclick: () => void c.switchMode(c.isDemo ? "live" : "demo") }, c.isDemo ? "Play for real" : "Watch the demo"),
+      h("p", { class: "meta" }, c.isDemo ? "You are watching one real person from a public dataset. Nothing here is yours." : "Everything is stored on this device only. Import your history from the Today screen; the server reads it in memory and keeps nothing."),
+      h("button", { class: c.isDemo ? "btn primary" : "btn", onclick: () => void c.switchMode(c.isDemo ? "live" : "demo") }, c.isDemo ? "Play for real ▶" : "Watch the demo"),
     ),
+    out,
   );
-
-  if (!c.isDemo) {
-    root.append(
-      h("section", { class: "card" },
-        h("h2", {}, "Import steps"),
-        h("p", { class: "meta" }, "Google Fit's Daily activity metrics.csv, a Fitbit / Pixel Watch export (all the steps-*.json files), or any CSV with date and steps columns. Days under 500 steps count as the phone or watch not carried, never as a miss. ", h("a", { href: "./export.html#steps", target: "_blank" }, "How do I export?")),
-        stepsFile,
-        h("button", { class: "btn", onclick: async () => {
-          const report = { kind: "steps" as const, files: names(stepsFile) };
-          try {
-            show("Reading…");
-            const texts = await readFiles(stepsFile);
-            if (!texts.length) return show("Choose a file first.");
-            const lines: string[] = [];
-            for (const t of texts) lines.push(await c.importStepsFile(t));
-            show(lines.join(" "), "good", report);
-          } catch (e) {
-            show(e instanceof Error ? e.message : "Could not read that file", "bad", report);
-          }
-        } }, "Import steps"),
-      ),
-      h("section", { class: "card" },
-        h("h2", {}, "Import workouts"),
-        h("p", { class: "meta" }, "A Hevy CSV export. Only the main lifts, a few dumbbell lifts and bodyweight moves are used; warm-ups, empty sets and assisted or weighted bodyweight variants are skipped. ", h("a", { href: "./export.html#hevy", target: "_blank" }, "How do I export?")),
-        hevyFile,
-        h("button", { class: "btn", onclick: async () => {
-          const report = { kind: "workouts" as const, files: names(hevyFile) };
-          try {
-            show("Reading…");
-            const [text] = await readFiles(hevyFile);
-            if (!text) return show("Choose a file first.");
-            show(await c.importHevyFile(text), "good", report);
-          } catch (e) {
-            show(e instanceof Error ? e.message : "Could not read that file", "bad", report);
-          }
-        } }, "Import workouts"),
-      ),
-    );
-  }
-  root.append(out, help);
 
   root.append(
     h("section", { class: "card" },

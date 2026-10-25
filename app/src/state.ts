@@ -1,7 +1,7 @@
 // One store, saved on the device (R7.3). Live play and the demo keep separate saves.
 import type { State } from "./types";
 
-const MODE_KEY = "slowstart.mode";
+const MODE_KEY = "slowstart.mode"; // older builds remembered the demo here; it is cleared on load
 const saveKey = (mode: State["mode"]) => `slowstart.${mode}.v1`;
 
 export function newState(mode: State["mode"], name = "you"): State {
@@ -35,11 +35,18 @@ function write(key: string, value: string): void {
   }
 }
 
+/** Opening the game always means live play. The demo is entered on purpose (the Demo link or button)
+ *  and is never resumed, so a visitor who watched it once is never stuck in it. */
 export function savedMode(): State["mode"] {
-  return read(MODE_KEY) === "demo" ? "demo" : "live";
+  return "live";
 }
 
 export function loadState(mode: State["mode"]): State {
+  try {
+    localStorage.removeItem(MODE_KEY);
+  } catch {
+    /* nothing to do */
+  }
   // The demo is never kept: every load starts at day one. Older builds did save it, so drop that save.
   if (mode === "demo") {
     clearState("demo");
@@ -56,8 +63,8 @@ export function loadState(mode: State["mode"]): State {
 }
 
 export function saveState(state: State): void {
-  if (state.mode !== "demo") write(saveKey(state.mode), JSON.stringify(state));
-  write(MODE_KEY, state.mode);
+  if (state.mode === "demo") return;
+  write(saveKey(state.mode), JSON.stringify(state));
 }
 
 export function clearState(mode: State["mode"]): void {
