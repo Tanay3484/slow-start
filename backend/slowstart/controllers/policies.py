@@ -64,6 +64,28 @@ def own_quantile(
     return clamp_goal(float(np.quantile(steps, q)), params or StepParams())
 
 
+MIN_IMPORTED = 7
+
+
+def history_start(history: Sequence[DayResult], params: StepParams) -> int | None:
+    """R1.10: where the controller starts for someone who brought history, or None for a new person.
+
+    The days imported before the first played day (no goal); their own 30th percentile over the last 28
+    calendar days of them, rounded to 50. Days played later never change it."""
+    played = [d.date for d in history if d.goal is not None]
+    first_played = min(played) if played else None
+    imported = [
+        d for d in history if d.goal is None and (first_played is None or d.date < first_played)
+    ]
+    if not imported:
+        return None
+    last = max(d.date for d in imported)
+    steps = recent_steps(imported, last + dt.timedelta(days=1))
+    if len(steps) < MIN_IMPORTED:
+        return None
+    return clamp_goal(round(float(np.quantile(steps, 0.30)) / 50) * 50, params)
+
+
 def fallback_window(history: Sequence[DayResult], day: dt.date, params: StepParams) -> int:
     """What the guard serves while H1 is a stub, and the cap when the predictor is unavailable (R1.8):
     80% of the trailing 14-day median, or the starting goal for a brand-new person."""

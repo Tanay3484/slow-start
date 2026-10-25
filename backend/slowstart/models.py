@@ -54,6 +54,7 @@ class Goal(Frozen):
     cap: Cap
     source: GoalSource
     note: str = ""
+    from_history: int | None = None  # R1.10: the start taken from imported days, if any
 
 
 class SetResult(Frozen):
