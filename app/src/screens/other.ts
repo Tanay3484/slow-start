@@ -78,7 +78,8 @@ export function dexScreen(c: Controller): HTMLElement {
   const root = h("div", { class: "screen" });
   const seen = new Set(c.s.seen);
   root.append(h("section", { class: "card" }, h("h2", {}, `Collection ${ALL_IDS.filter((i) => seen.has(i)).length} / ${ALL_IDS.length}`),
-    h("p", { class: "meta" }, "Every day brings a wild creature. Different places bring different ones, and somewhere new brings a rare one.")));
+    h("p", { class: "meta" }, "Every day brings a wild creature. Different places bring different ones, and somewhere new brings a rare one."),
+    h("a", { class: "btn", href: "./guide.html" }, "Field guide and trivia")));
   const grid = h("div", { class: "dex" });
   for (const id of ALL_IDS) {
     const cr = CREATURES[id];

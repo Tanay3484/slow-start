@@ -31,6 +31,14 @@ BODY_AREAS = (
     "knee", "knees", "back", "ankle", "ankles", "shoulder", "shoulders", "hip", "hips", "neck",
     "wrist", "wrists", "elbow", "elbows", "foot", "feet", "calf", "calves", "hamstring", "hamstrings",
     "quad", "quads", "glutes", "head", "legs", "leg", "arms", "arm", "chest", "core", "abs",
+    "upper body", "lower body", "biceps", "triceps", "lats", "traps",
+)  # fmt: skip
+# Gym words say which part of the body did the work: "weighted pull ups" means a sore upper body.
+EXERCISE_HINTS: tuple[tuple[str, str], ...] = (
+    (r"\bpull[- ]?ups?\b|\bchin[- ]?ups?\b|\bpush[- ]?ups?\b|\bbench\b|\boverhead press\b|\bdips?\b"
+     r"|\brows?\b|\bcurls?\b|\bpress[- ]?ups?\b", "upper body"),
+    (r"\bsquats?\b|\blunges?\b|\bleg press\b|\bleg day\b|\bstep[- ]?ups?\b", "legs"),
+    (r"\bdeadlifts?\b", "lower body"),
 )  # fmt: skip
 LOW_WORDS = (
     "tired", "exhausted", "drained", "sleepy", "wiped", "no energy", "knackered", "burnt out", "brutal",
@@ -144,8 +152,8 @@ SCHEMA = {
     "required": ["energy", "body", "line"],
 }
 
-UPPER = {"shoulder", "shoulders", "arm", "arms", "chest", "elbow", "elbows", "wrist", "wrists"}
-LEGS = {"leg", "legs", "knee", "knees", "calf", "calves", "hamstring", "hamstrings", "quad", "quads", "glutes", "hip", "hips"}  # fmt: skip
+UPPER = {"shoulder", "shoulders", "arm", "arms", "chest", "elbow", "elbows", "wrist", "wrists", "upper body", "biceps", "triceps", "lats", "traps"}  # fmt: skip
+LEGS = {"leg", "legs", "knee", "knees", "calf", "calves", "hamstring", "hamstrings", "quad", "quads", "glutes", "hip", "hips", "lower body"}  # fmt: skip
 FEET = {"foot", "feet", "ankle", "ankles"}
 
 
@@ -199,8 +207,10 @@ def _mentions(low: str, area: str) -> bool:
 def keyword_body(text: str) -> list[str]:
     low = text.lower()
     found = [a for a in BODY_AREAS if _mentions(low, a)]
-    if re.search(r"\bleg day\b", low) and "legs" not in found and "leg" not in found:
-        found.insert(0, "legs")
+    for pattern, area in EXERCISE_HINTS:
+        covered = area in found or (area == "legs" and "leg" in found)
+        if re.search(pattern, low) and not covered:
+            found.insert(0, area)
     return found[:3]
 
 

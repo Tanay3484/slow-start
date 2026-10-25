@@ -171,11 +171,13 @@ def test_play_route_serves_the_game_page(tmp_path, settings):
 
     (tmp_path / "index.html").write_text("landing")
     (tmp_path / "play.html").write_text("game")
+    (tmp_path / "guide.html").write_text("guide")
     s = settings.model_copy(update={"static_dir": str(tmp_path)})
     c = TestClient(create_app(Services(settings=s, predictor=None, llm=None)))
     assert c.get("/").text == "landing"
     assert c.get("/play").text == "game"
     assert c.get("/play.html").text == "game"
+    assert c.get("/guide").text == "guide"
     assert c.get("/anything-else").text == "landing"
 
 
@@ -251,3 +253,13 @@ def test_runaway_model_text_is_cut():
     assert clean_line(raw) == "Let me simply wait here with you, friend."
     out = read_checkin("back is stiff", FakeLLM({"energy": "low", "body": ["back"], "line": raw}))
     assert out.source == "gemma" and "<" not in out.line and "}" not in out.line
+
+
+def test_gym_words_map_to_the_body_part_that_worked():
+    from slowstart.checkin.reader import TIPS, keyword_body, read_checkin
+
+    text = "Upper body is really sore from weighted pull ups yesterday"
+    assert "upper body" in keyword_body(text)
+    assert read_checkin(text, None).tip in TIPS["upper"]
+    assert read_checkin("squats destroyed me", None).tip in TIPS["legs"]
+    assert "upper body" in keyword_body("did push-ups and dips")

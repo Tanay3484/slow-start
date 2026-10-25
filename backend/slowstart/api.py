@@ -133,7 +133,12 @@ def create_app(services: Services | None = None) -> FastAPI:
             candidate = (static / path).resolve()
             if path and candidate.is_file() and static.resolve() in candidate.parents:
                 return FileResponse(candidate, headers={"Cache-Control": "no-cache"})
-            page = "play.html" if path.strip("/").startswith("play") else "index.html"
+            route = path.strip("/")
+            page = "index.html"
+            if route.startswith("play"):
+                page = "play.html"
+            elif route.startswith("guide"):
+                page = "guide.html"
             if not (static / page).is_file():
                 page = "index.html"
             return FileResponse(static / page, headers={"Cache-Control": "no-cache"})
