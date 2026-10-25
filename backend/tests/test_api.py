@@ -177,3 +177,77 @@ def test_play_route_serves_the_game_page(tmp_path, settings):
     assert c.get("/play").text == "game"
     assert c.get("/play.html").text == "game"
     assert c.get("/anything-else").text == "landing"
+
+
+# ---- check-in replies: a reaction, a tip chosen by code, and now and then a rock joke ----
+
+
+def test_a_one_word_model_reply_is_replaced():
+    from slowstart.checkin.reader import read_checkin
+
+    out = read_checkin(
+        "Hello Slumbrock, today's leg day was brutal",
+        FakeLLM({"energy": "low", "body": [], "line": "rest"}),
+    )
+    assert out.source == "template" and len(out.line.split()) >= 4
+
+
+def test_leg_day_gets_a_leg_tip_and_the_legs_body_part():
+    from slowstart.checkin.reader import TIPS, read_checkin
+
+    out = read_checkin("Hello Slumbrock, today's leg day was brutal", None)
+    assert out.energy == "low" and {"leg", "legs"} & set(out.body)
+    assert out.tip in TIPS["legs"]
+
+
+def test_tips_follow_what_was_said():
+    from slowstart.checkin.reader import TIPS, read_checkin
+
+    assert read_checkin("I have the flu", None).tip in TIPS["excused"]
+    assert read_checkin("my lower back is killing me", None).tip in TIPS["back"]
+    assert read_checkin("feeling fantastic today", None).tip in TIPS["high"]
+
+
+def test_no_digits_or_advice_numbers_anywhere_in_the_canned_text():
+    from slowstart.checkin.reader import ASIDES, TEMPLATES, TIPS
+
+    canned = [
+        *ASIDES,
+        *(t for v in TIPS.values() for t in v),
+        *(t for v in TEMPLATES.values() for t in v),
+    ]
+    assert canned and not any(any(ch.isdigit() for ch in t) for t in canned)
+
+
+def test_asides_appear_sometimes_never_when_ill_and_are_stable():
+    from slowstart.checkin.reader import read_checkin
+
+    texts = [
+        f"walked to the shop number {w}"
+        for w in ("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
+    ]
+    asides = [read_checkin(t, None).aside for t in texts]
+    assert any(asides) and not all(asides)
+    assert read_checkin(texts[0], None).aside == asides[0]  # same message, same reply
+    assert all(
+        read_checkin(f"I am sick, day {w}", None).aside == ""
+        for w in ("one", "two", "three", "four")
+    )
+
+
+def test_back_and_head_need_context_to_count_as_body_parts():
+    from slowstart.checkin.reader import keyword_body
+
+    assert "back" not in keyword_body("walked to work and back, feeling good")
+    assert "back" in keyword_body("my back is stiff from sitting")
+    assert "head" not in keyword_body("about to head out for a walk")
+    assert "head" in keyword_body("bit of a headache, my head hurts")
+
+
+def test_runaway_model_text_is_cut():
+    from slowstart.checkin.reader import clean_line, read_checkin
+
+    raw = "Let me simply wait here with you, friend.”} </div> </div> </div>"
+    assert clean_line(raw) == "Let me simply wait here with you, friend."
+    out = read_checkin("back is stiff", FakeLLM({"energy": "low", "body": ["back"], "line": raw}))
+    assert out.source == "gemma" and "<" not in out.line and "}" not in out.line

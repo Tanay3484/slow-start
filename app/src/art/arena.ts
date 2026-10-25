@@ -303,8 +303,13 @@ const AMBIENT: Record<Habitat, { color: string[]; kind: Particle["kind"]; rate: 
 };
 
 export class Arena {
-  readonly el: HTMLCanvasElement;
+  /** A box holding the pixel canvas and, on top, a full-resolution canvas just for text. */
+  readonly el: HTMLDivElement;
+  private canvas: HTMLCanvasElement;
   private g: CanvasRenderingContext2D;
+  private tcanvas: HTMLCanvasElement;
+  private tg: CanvasRenderingContext2D;
+  private k = 1; // text-canvas pixels per arena pixel
   private view: ArenaView | null = null;
   private raf = 0;
   private hero: Actor;
@@ -330,12 +335,21 @@ export class Arena {
   private last = 0;
 
   constructor() {
-    this.el = document.createElement("canvas");
-    this.el.width = W;
-    this.el.height = H;
-    this.el.className = "arena";
+    this.el = document.createElement("div");
+    this.el.className = "arena-box";
     this.el.setAttribute("role", "img");
-    this.g = this.el.getContext("2d")!;
+    this.canvas = document.createElement("canvas");
+    this.canvas.width = W;
+    this.canvas.height = H;
+    this.canvas.className = "arena";
+    this.g = this.canvas.getContext("2d")!;
+    // Text drawn into a 240 x 135 canvas and blown up is a blur, so words go on their own canvas at the
+    // screen's real resolution. It keeps a 16:9 shape so it crops exactly like the pixel canvas.
+    this.tcanvas = document.createElement("canvas");
+    this.tcanvas.className = "arena-text";
+    this.tcanvas.setAttribute("aria-hidden", "true");
+    this.tg = this.tcanvas.getContext("2d")!;
+    this.el.append(this.canvas, this.tcanvas);
     this.hero = new Actor("slumbrock_0", 8, 0);
     this.place(this.hero);
     this.el.addEventListener("pointerdown", (e) => this.onTap(e));
@@ -561,7 +575,7 @@ export class Arena {
   }
 
   private onTap(e: PointerEvent): void {
-    const r = this.el.getBoundingClientRect();
+    const r = this.canvas.getBoundingClientRect();
     const x = ((e.clientX - r.left) / r.width) * W;
     const y = ((e.clientY - r.top) / r.height) * H;
     const now = performance.now();
@@ -662,15 +676,41 @@ export class Arena {
 
   // ------------------------------------------------------------ drawing
 
-  private text(s: string, x: number, y: number, color: string, size = 8, align: CanvasTextAlign = "center"): void {
-    const g = this.g;
-    g.font = this.fontReady ? `${size}px "Press Start 2P"` : `bold ${size + 1}px monospace`;
-    g.textAlign = align;
+  /** Keep the text canvas at the screen's resolution (cover-cropped like the pixel canvas). */
+  private syncText(): void {
+    const bw = this.el.clientWidth;
+    const bh = this.el.clientHeight;
+    if (!bw || !bh) return;
+    const dpr = Math.min(3, window.devicePixelRatio || 1);
+    const k = Math.max(bw / W, bh / H) * dpr;
+    const w = Math.round(W * k);
+    const h = Math.round(H * k);
+    if (this.tcanvas.width !== w || this.tcanvas.height !== h) {
+      this.tcanvas.width = w;
+      this.tcanvas.height = h;
+    }
+    this.k = k;
+  }
+
+  /** Crisp text on the overlay. `size` is in arena pixels; the pixel font is sharpest at multiples of 8. */
+  private text(s: string, x: number, y: number, color: string, size = 8, alpha = 1): void {
+    const g = this.tg;
+    const k = this.k;
+    const px = Math.max(8, Math.round((size * k) / 8) * 8);
+    g.save();
+    g.globalAlpha = alpha;
+    g.font = this.fontReady ? `${px}px "Press Start 2P"` : `bold ${px}px monospace`;
+    g.textAlign = "center";
     g.textBaseline = "top";
-    g.fillStyle = "#141626";
-    for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1], [1, 1]]) g.fillText(s, Math.round(x + dx), Math.round(y + dy));
+    g.lineJoin = "round";
+    g.lineWidth = Math.max(2, Math.round(px / 4));
+    g.strokeStyle = "#141626";
+    const tx = Math.round(x * k);
+    const ty = Math.round(y * k);
+    g.strokeText(s, tx, ty);
     g.fillStyle = color;
-    g.fillText(s, Math.round(x), Math.round(y));
+    g.fillText(s, tx, ty);
+    g.restore();
   }
 
   private glow(x: number, y: number, r: number, color: string, alpha: number): void {
@@ -694,8 +734,18 @@ export class Arena {
       this.layer = staticLayer(v.habitat, sky);
       this.layerKey = key;
     }
+    this.syncText();
+    const tg = this.tg;
+    tg.setTransform(1, 0, 0, 1, 0, 0);
+    tg.clearRect(0, 0, this.tcanvas.width, this.tcanvas.height);
     g.save();
-    if (now < this.shake.until) g.translate(Math.round((Math.random() - 0.5) * this.shake.mag * 2), Math.round((Math.random() - 0.5) * this.shake.mag * 2));
+    tg.save();
+    if (now < this.shake.until) {
+      const sx = Math.round((Math.random() - 0.5) * this.shake.mag * 2);
+      const sy = Math.round((Math.random() - 0.5) * this.shake.mag * 2);
+      g.translate(sx, sy);
+      tg.translate(sx * this.k, sy * this.k);
+    }
     g.drawImage(this.layer, 0, 0);
 
     // sun or moon, clouds, water, aurora
@@ -825,9 +875,7 @@ export class Arena {
       if (p.kind === "leaf") p.x += Math.sin((p.life + p.y) / 14) * 0.25;
       const fade = Math.min(1, (p.max - p.life) / 18);
       if (p.kind === "text") {
-        g.globalAlpha = Math.max(0, fade);
-        this.text(p.text ?? "", p.x, p.y, p.color, p.big ? 10 : 8);
-        g.globalAlpha = 1;
+        this.text(p.text ?? "", p.x, p.y, p.color, p.big ? 10 : 8, Math.max(0, fade));
       } else if (p.kind === "glow") {
         this.glow(p.x, p.y, p.size === 3 ? 9 : 4, p.color, Math.max(0, fade) * (0.6 + Math.sin(p.life / 6) * 0.4));
         g.fillStyle = p.color;
@@ -861,10 +909,11 @@ export class Arena {
         g.fillStyle = b.color;
         g.fillRect(0, y + (b.sub ? 27 : 17), W, 1);
         this.text(b.text, W / 2, y + 5, b.color, 8);
-        if (b.sub) this.text(b.sub, W / 2, y + 17, "#c0cbdc", 5);
+        if (b.sub) this.text(b.sub, W / 2, y + 17, "#c0cbdc", 6);
       }
     }
     g.restore();
+    tg.restore();
 
     // screen flash and the battle wipe
     if (this.flash.dur && now - this.flash.start < this.flash.dur) {

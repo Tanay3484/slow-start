@@ -80,6 +80,10 @@ export interface Checkin {
   body: string[];
   excused: boolean;
   line: string;
+  /** Chosen by code from a curated list, never by the model. */
+  tip: string;
+  /** Now and then, a rock joke. */
+  aside: string;
   source: "gemma" | "template";
 }
 

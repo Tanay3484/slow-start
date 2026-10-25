@@ -6,6 +6,8 @@ import { xpRuleWritten } from "../game/rules";
 
 // ---------------------------------------------------------------- Talk
 
+const capitalise = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+
 export function talkScreen(c: Controller): HTMLElement {
   const root = h("div", { class: "screen" });
   const box = h("textarea", { maxlength: 300, rows: 3, placeholder: "e.g. leg day, knees sore, only a short walk in me", "aria-label": "How are you today?", oninput: (e: Event) => { c.draft = (e.target as HTMLTextAreaElement).value; } });
@@ -17,7 +19,7 @@ export function talkScreen(c: Controller): HTMLElement {
   root.append(
     h("section", { class: "card" },
       h("h2", {}, "Tell Slumbrock"),
-      h("p", { class: "meta" }, "One line about how today feels. Gemma reads it; code decides what it means. If you are ill or hurt, the day is excused: no cut, no penalty."),
+      h("p", { class: "meta" }, "One line about how today feels. Gemma answers as Slumbrock; the tip and whether the day is excused are decided by code. Ill or hurt? The day is excused: no cut, no penalty."),
       box,
       h("button", { class: "btn primary", disabled: c.busy === "checkin", onclick: send }, c.busy === "checkin" ? "Slumbrock is thinking…" : "Talk"),
     ),
@@ -25,8 +27,9 @@ export function talkScreen(c: Controller): HTMLElement {
   const r = c.lastCheckin;
   if (r) {
     root.append(
-      h("section", { class: "card" },
-        h("div", { class: "bubble" }, r.line),
+      h("section", { class: "card reply" },
+        h("div", { class: "bubble big-bubble" }, r.line, r.aside ? h("span", { class: "aside" }, ` ${r.aside}`) : null),
+        r.tip ? h("p", { class: "tip" }, capitalise(r.tip.replace(/^Tip:\s*/, ""))) : null,
         h("div", { class: "chips" },
           h("span", { class: "chip" }, `Energy: ${r.energy}`),
           ...r.body.map((b) => h("span", { class: "chip" }, b)),

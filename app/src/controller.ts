@@ -219,7 +219,7 @@ export class Controller {
       const r = await api.checkin(text);
       this.lastCheckin = r;
       const date = this.date;
-      this.store.set((s) => ({ ...s, checkin: { date, line: r.line } }));
+      this.store.set((s) => ({ ...s, checkin: { date, line: [r.line, r.aside].filter(Boolean).join(" ") } }));
       if (r.excused) this.setExcused(true);
     } catch (e) {
       this.notify(e instanceof Error ? e.message : "Slumbrock could not hear you", "bad");
