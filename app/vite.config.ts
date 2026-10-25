@@ -13,6 +13,7 @@ export default defineConfig({
       input: {
         index: resolve(__dirname, "index.html"),
         play: resolve(__dirname, "play.html"),
+        guide: resolve(__dirname, "guide.html"),
       },
     },
   },

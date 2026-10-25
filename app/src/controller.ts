@@ -178,8 +178,8 @@ export class Controller {
   }
 
   async switchMode(mode: State["mode"]): Promise<void> {
-    this.store.replace(loadState(mode));
-    if (mode === "demo" && this.s.days.length === 0) this.store.set((s) => ({ ...s, name: "Demo person" }));
+    // Live play keeps its save. The demo always starts from day one, so every visitor sees the whole story.
+    this.store.replace(mode === "demo" ? newState("demo", "Demo person") : loadState(mode));
     this.tab = "today";
     this.targets.clear();
     this.notify(null);
