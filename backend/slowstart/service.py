@@ -6,7 +6,7 @@ import datetime as dt
 from collections.abc import Sequence
 
 from slowstart.config import Settings
-from slowstart.controllers import guard
+from slowstart.controllers import guard, policies
 from slowstart.models import Cap, DayResult, ExerciseGoal, ExerciseParams, Goal, Session, StepParams
 from slowstart.prediction.cap import compute_cap
 from slowstart.prediction.predictor import Predictor
@@ -28,6 +28,9 @@ def step_goal(
 ) -> Goal:
     params = params or StepParams(ai=settings.step_ai)
     days = clean_history(history, today)
+    seeded = policies.history_start(days, params)  # R1.10: start from imported history
+    if seeded is not None:
+        params = params.model_copy(update={"start": seeded})
     decision, source = guard.step_window(days, today, params)
     cap = compute_cap(days, today, predictor, settings, params) if use_cap else Cap(source="none")
     goal = decision.window if cap.value is None else min(decision.window, cap.value)
@@ -45,6 +48,7 @@ def step_goal(
         cap=cap,
         source=source,
         note=" ".join(notes),
+        from_history=seeded,
     )
 
 
