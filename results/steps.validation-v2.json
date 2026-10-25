@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-23",
+  "generated": "2026-10-25",
   "dry_run": false,
   "predictor": "tabpfn-v2",
   "tabpfn_package": "9.2.0",
@@ -10,7 +10,7 @@
   "people_loaded": 35,
   "person_days_loaded": 981,
   "not_worn_excluded": 94,
-  "controller_written": false,
+  "controller_written": true,
   "params": {
     "start": 1500,
     "floor": 1000,
@@ -26,23 +26,31 @@
       "label": "Fixed 10,000",
       "goal_met": 0.3620689655172414,
       "mean_goal": 10000.0,
-      "goal_level": null,
-      "vs_baseline": null
+      "goal_level": 1.5983446767362859,
+      "vs_baseline": [
+        -0.27832512315270935,
+        -0.41346153846153844,
+        -0.1457938569682154
+      ]
     },
     {
       "policy": "trailing_median_28d",
       "label": "Own 28-day median",
       "goal_met": 0.5394088669950738,
       "mean_goal": 8368.539408866995,
-      "goal_level": null,
-      "vs_baseline": null
+      "goal_level": 1.0269415564598692,
+      "vs_baseline": [
+        -0.10098522167487689,
+        -0.13066923076923076,
+        -0.07316499282639895
+      ]
     },
     {
       "policy": "own_p30_28d",
       "label": "Own 28-day 30th percentile",
       "goal_met": 0.6403940886699507,
       "mean_goal": 7009.327586206897,
-      "goal_level": null,
+      "goal_level": 0.8342236011591391,
       "vs_baseline": null
     },
     {
@@ -50,8 +58,36 @@
       "label": "TabPFN 30th percentile (cap alone)",
       "goal_met": 0.6748768472906403,
       "mean_goal": 6996.059113300493,
-      "goal_level": null,
-      "vs_baseline": null
+      "goal_level": 0.8810019359103681,
+      "vs_baseline": [
+        0.03448275862068961,
+        -0.005143061803770402,
+        0.07368734335839598
+      ]
+    },
+    {
+      "policy": "controller",
+      "label": "Controller (slow start / AIMD)",
+      "goal_met": 0.8817733990147784,
+      "mean_goal": 3951.881773399015,
+      "goal_level": 0.5186684357110254,
+      "vs_baseline": [
+        0.24137931034482762,
+        0.19317800999268822,
+        0.2893581545654565
+      ]
+    },
+    {
+      "policy": "controller_tabpfn_cap",
+      "label": "Controller + TabPFN cap",
+      "goal_met": 0.8842364532019704,
+      "mean_goal": 3980.3546798029556,
+      "goal_level": 0.519211316988386,
+      "vs_baseline": [
+        0.24384236453201968,
+        0.1945168692849385,
+        0.2924540094339623
+      ]
     }
   ],
   "cap_calibration": {

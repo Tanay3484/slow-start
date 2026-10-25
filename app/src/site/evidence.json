@@ -19,6 +19,14 @@
    "tabpfn_p30_cap": {
     "goal_met": 0.6798,
     "mean_goal": 6809
+   },
+   "controller": {
+    "goal_met": 0.8818,
+    "mean_goal": 3952
+   },
+   "controller_tabpfn_cap": {
+    "goal_met": 0.8842,
+    "mean_goal": 3986
    }
   }
  },
@@ -42,6 +50,14 @@
    "tabpfn_p30_cap": {
     "goal_met": 0.6749,
     "mean_goal": 6996
+   },
+   "controller": {
+    "goal_met": 0.8818,
+    "mean_goal": 3952
+   },
+   "controller_tabpfn_cap": {
+    "goal_met": 0.8842,
+    "mean_goal": 3980
    }
   }
  },
@@ -65,6 +81,14 @@
    "tabpfn_p30_cap": {
     "goal_met": 0.6657,
     "mean_goal": 6860
+   },
+   "controller": {
+    "goal_met": 0.8657,
+    "mean_goal": 3911
+   },
+   "controller_tabpfn_cap": {
+    "goal_met": 0.8657,
+    "mean_goal": 3905
    }
   }
  },
@@ -88,6 +112,14 @@
    "tabpfn_p30_cap": {
     "goal_met": 0.6657,
     "mean_goal": 6947
+   },
+   "controller": {
+    "goal_met": 0.8657,
+    "mean_goal": 3911
+   },
+   "controller_tabpfn_cap": {
+    "goal_met": 0.8629,
+    "mean_goal": 3914
    }
   }
  }

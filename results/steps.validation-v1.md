@@ -1,6 +1,6 @@
 # Steps results
 
-Generated 2026-10-23. Data: Kaggle 'Fitbit Fitness Tracker Data' (arashnic/fitbit), CC0, 2016-03-12 to 2016-05-12. Feature set: v1, data cut at 2016-04-28 (validation).
+Generated 2026-10-25. Data: Kaggle 'Fitbit Fitness Tracker Data' (arashnic/fitbit), CC0, 2016-03-12 to 2016-05-12. Feature set: v1, data cut at 2016-04-28 (validation).
 
 - **33 people, 406 person-days** scored: the last window starting 2016-04-15, only days where every policy set a goal and the person had at least 7 worn days before.
 - 94 of 981 loaded person-days have 0 steps and are treated as 'tracker not worn': not scored and not fed to any policy.
@@ -8,10 +8,12 @@ Generated 2026-10-23. Data: Kaggle 'Fitbit Fitness Tracker Data' (arashnic/fitbi
 
 | Policy | Goal met | Mean goal (steps) | Goal level | Met vs own 30th pct (95% CI) |
 |---|---|---|---|---|
-| Fixed 10,000 | 36.2% | 10000 | locked | locked |
-| Own 28-day median | 53.9% | 8369 | locked | locked |
-| Own 28-day 30th percentile | 64.0% | 7009 | locked | (baseline) |
-| TabPFN 30th percentile (cap alone) | 68.0% | 6809 | locked | locked |
+| Fixed 10,000 | 36.2% | 10000 | 1.60 | -27.8 pts (-41.3 to -14.6) |
+| Own 28-day median | 53.9% | 8369 | 1.03 | -10.1 pts (-13.1 to -7.3) |
+| Own 28-day 30th percentile | 64.0% | 7009 | 0.83 | (baseline) |
+| TabPFN 30th percentile (cap alone) | 68.0% | 6809 | 0.86 | +3.9 pts (-0.3 to +8.4) |
+| Controller (slow start / AIMD) | 88.2% | 3952 | 0.52 | +24.1 pts (+19.3 to +28.9) |
+| Controller + TabPFN cap | 88.4% | 3986 | 0.52 | +24.4 pts (+19.5 to +29.2) |
 
 **Goal met** is the share of person-days with steps ≥ goal. **Goal level** is the mean of goal ÷ the person's median steps before the window: a policy cannot win by quietly setting tiny goals without this number showing it. The interval resamples people, not days.
 

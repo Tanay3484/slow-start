@@ -1,29 +1,30 @@
 # Render Blueprint: https://render.com/docs/blueprint-spec
 #
 #   slowstart         the app and the API in one container: Python, TabPFN v2 on CPU, the built game
-#   slowstart-ollama  private Ollama server with gemma3:1b baked in (reads check-ins, speaks as the giant)
+#   slowstart-ollama  private Ollama server with gemma3:4b baked in (reads check-ins, speaks as the giant)
 #
 # Both must be in the same region to reach each other privately.
-# slowstart needs about 1 GB at run time (TabPFN v2 plus torch measured 584 MB at peak), so the 512 MB
-# plans are too small and `standard` (2 GB) is the smallest that fits. The model service is optional:
-# without it check-ins fall back to templates and nothing else changes.
+# slowstart needs about 1 GB at run time (TabPFN v2 plus torch measured 598 MB at peak in the container),
+# so the 512 MB plans are too small and 1c-2g is the smallest that fits. Gemma 4B needs about 3.5 GB loaded,
+# so its service is 2c-4g; 1B fits 1c-2g but its replies were noticeably flatter in testing. The model
+# service is optional: without it check-ins fall back to templates and nothing else changes.
 services:
   - type: web
     name: slowstart
     runtime: docker
     region: singapore
-    plan: standard
+    plan: 1c-2g
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/health
     envVars:
       - key: SS_MODEL
-        value: gemma3:1b
+        value: gemma3:4b
       - key: SS_LLM_TIMEOUT_S
-        value: "90"
+        value: "120"
       # One thread per CPU of the Ollama service.
       - key: SS_LLM_NUM_THREAD
-        value: "1"
+        value: "2"
       - key: SS_OLLAMA_URL
         fromService:
           type: pserv
@@ -34,7 +35,7 @@ services:
     name: slowstart-ollama
     runtime: docker
     region: singapore
-    plan: 1c-2g
+    plan: 2c-4g
     dockerfilePath: ./ollama/Dockerfile
     dockerContext: ./ollama
     envVars:
