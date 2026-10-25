@@ -42,7 +42,10 @@ function render(): void {
     const header = h("header", { class: "top" },
       h("a", { class: "brand", href: "./", title: "About Slow Start" }, "Slow Start"),
       nav,
-      c.isDemo ? h("span", { class: "chip warn mode" }, "Demo") : h("span", { class: "chip mode" }, "Live"),
+      h("div", { class: "top-right" },
+        h("a", { class: "top-link", href: "./guide.html" }, "Guide"),
+        c.isDemo ? h("span", { class: "chip warn mode" }, "Demo") : h("span", { class: "chip mode" }, "Live"),
+      ),
     );
     const layout = h("div", { class: `layout tab-${c.tab}` }, stagePanel(c), h("main", { class: "panel" }, screen()));
     const parts: Node[] = [header, layout];

@@ -51,6 +51,9 @@ p { margin: 0 0 10px; }
 .brand { color: var(--gold); text-decoration: none; font-size: 14px; letter-spacing: 0.5px; text-shadow: 0 2px 0 var(--shadow); }
 .brand:hover { color: var(--text); }
 .chip.mode { font-size: 7px; }
+.top-right { display: flex; align-items: center; gap: 12px; }
+.top-link { font: 8px var(--pixel); color: var(--cyan); text-decoration: none; text-transform: uppercase; }
+.top-link:hover { color: var(--gold); }
 
 .tabs {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 7;
