@@ -40,6 +40,11 @@ export function savedMode(): State["mode"] {
 }
 
 export function loadState(mode: State["mode"]): State {
+  // The demo is never kept: every load starts at day one. Older builds did save it, so drop that save.
+  if (mode === "demo") {
+    clearState("demo");
+    return newState("demo", "Demo person");
+  }
   const raw = read(saveKey(mode));
   if (!raw) return newState(mode);
   try {
@@ -51,7 +56,7 @@ export function loadState(mode: State["mode"]): State {
 }
 
 export function saveState(state: State): void {
-  write(saveKey(state.mode), JSON.stringify(state));
+  if (state.mode !== "demo") write(saveKey(state.mode), JSON.stringify(state));
   write(MODE_KEY, state.mode);
 }
 
