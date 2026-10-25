@@ -297,9 +297,20 @@ export class Controller {
     });
     if (dayOf(this.s, today)?.steps === null) this.patchDay({ goal: null, window: null });
     await this.ensureGoal();
+    // The file's own today is steps so far: log them, and Slumbrock attacks like any logged steps.
+    // Without today in the file, the history still gets a stomp, but no damage.
+    const todayRow = imp.days.find((d) => d.date === today && d.steps !== null);
+    const sofar = this.day.steps ?? 0;
+    const past = imp.days.filter((d) => d.date < today).length;
+    if (!this.isDemo && todayRow?.steps && todayRow.steps > sofar) {
+      this.logSteps(todayRow.steps);
+    } else if (past > 0) {
+      this.arena.cheer(`${past.toLocaleString("en-US")} DAYS IMPORTED`, "Your goal now starts from them");
+    }
     const notes = imp.warnings.map((w) => ` ${w}.`).join("");
     const kept = imp.days.length > HISTORY_DAYS ? ` Goals use the latest ${HISTORY_DAYS} days.` : "";
-    return `Read ${imp.days.length.toLocaleString("en")} days as ${FORMAT_LABEL[imp.format] ?? imp.format} (${imp.first} to ${imp.last}).${notes}${kept}`;
+    const logged = todayRow?.steps && todayRow.steps > sofar ? ` Today so far: ${todayRow.steps.toLocaleString("en")} steps, logged from the file.` : "";
+    return `Read ${imp.days.length.toLocaleString("en")} days as ${FORMAT_LABEL[imp.format] ?? imp.format} (${imp.first} to ${imp.last}).${notes}${kept}${logged}`;
   }
 
   async importHevyFile(text: string): Promise<string> {
