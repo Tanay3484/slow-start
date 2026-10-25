@@ -42,7 +42,8 @@ def locked(fn, *args, **kwargs):
 
 
 def build(args) -> dict:
-    params, settings = StepParams(), Settings()
+    params = StepParams() if args.ai is None else StepParams(ai=args.ai)
+    settings = Settings()
     settings = settings.model_copy(
         update={"tabpfn_estimators": args.n_estimators, "feature_set": args.features}
     )
@@ -57,7 +58,7 @@ def build(args) -> dict:
 
     predictor = EmpiricalPredictor() if args.fake else TabPFNPredictor(args.n_estimators)
     name = "fake" if args.fake else f"tabpfn-v2-n{args.n_estimators}-{args.features}"
-    cache = Path(args.out) / "cache" / f"caps-{name}.json"
+    cache = Path(args.cache) / f"caps-{name}.json"
     print(f"loaded {len(people)} people, {len(all_days)} person-days, {not_worn} not worn")
     caps = steps_eval.calendar_caps(people, predictor, settings, cache_path=cache, progress=print)
 
@@ -192,6 +193,10 @@ def main() -> int:
     ap.add_argument("--until", help="drop days after this date (validation runs)")
     ap.add_argument("--label", default="final", help="final or validation; part of the file name")
     ap.add_argument("--fake", action="store_true", help="stand-in predictor; pipeline check only")
+    ap.add_argument(
+        "--ai", type=int, help="the controller's step per won day (default: StepParams)"
+    )
+    ap.add_argument("--cache", default="results/cache", help="where TabPFN predictions are cached")
     args = ap.parse_args()
     result = build(args)
     out = Path(args.out)

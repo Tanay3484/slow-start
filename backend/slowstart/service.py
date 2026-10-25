@@ -26,7 +26,7 @@ def step_goal(
     params: StepParams | None = None,
     use_cap: bool = True,
 ) -> Goal:
-    params = params or StepParams()
+    params = params or StepParams(ai=settings.step_ai)
     days = clean_history(history, today)
     decision, source = guard.step_window(days, today, params)
     cap = compute_cap(days, today, predictor, settings, params) if use_cap else Cap(source="none")

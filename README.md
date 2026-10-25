@@ -11,19 +11,38 @@ art and names here are original; nothing is taken from Pokémon or Nintendo.
 
 Built for the DEV Hacktoberfest 2026 Open-Source AI Challenge, Week 3: *Slow and Steady*.
 
-> **Status (2026-10-23):** the app, backend, evaluation and Android build work. Four core functions
-> (the step and exercise controllers, the evaluation statistics, and the XP rule) are being written by hand
-> by the author; until each lands, a labelled baseline stands in and the app says so. The specs in
-> [`specs/`](specs/) say what is built and what is not. Numbers are in [`results/`](results/).
+**Live:** <https://slowstart.onrender.com> (the game is at `/play`, the field guide at `/guide`).
+
+## Who wrote what
+
+The project was built with an AI coding agent (Claude) under a spec-first workflow
+([`specs/`](specs/)). Four core functions were set aside to be written by hand:
+
+| Level | Function | Written by |
+|---|---|---|
+| H1 | The step controller (`backend/slowstart/controllers/steps.py`) | Tanay, from a skeleton |
+| H3 | The evaluation statistics (`backend/slowstart/evaluation/stats.py`) | Tanay, from a skeleton |
+| H2 | The exercise controller (`backend/slowstart/controllers/exercise.py`) | Claude, handed over by Tanay to make the deadline |
+| H4 | The XP and stage rule (`app/src/game/xp.ts`) | Claude, handed over by Tanay to make the deadline |
+
+Everything else (the app, the art, the engine, the backend, the evaluation harness) was written by Claude
+and reviewed by Tanay through pull requests.
 
 ## What the first evaluation found
 
-On the public Fitbit data (33 people, two months, 2016), TabPFN's 30th-percentile cap and a plain "your own
-30th percentile over the last 28 days" are **indistinguishable**: TabPFN was ahead by 3.9 points on the
-validation window and behind by 3.1 on the final one. Both are met on about two days in three, against
-one in three for a fixed 10,000, but they also ask for much less (a mean goal near 6,900 steps against
-10,000), so that gap says little on its own. The comparison, the protocol and the limits are in
-[`results/steps.summary.md`](results/steps.summary.md).
+On the public Fitbit data (33 people, two months, 2016), on held-out days:
+
+- A fixed 10,000 steps is met on **34.6%** of days.
+- The first controller (a 250-step climb after each win) met **86.6%**, but only by asking for **half** of
+  what people usually walk. The goal-level guardrail caught it.
+- With the climb chosen on a validation window by a rule fixed in advance (1,500 steps), Slow Start meets
+  **71.1%** of days while asking for **74%** of a usual day. A plain "your own 30th percentile" meets
+  **69.7%** at **79%**. The difference is +1.4 points (95% interval −4.8 to +7.4): **a tie**.
+- TabPFN's cap on its own ties the plain percentile too (−3.1 points, −9.1 to +2.2).
+
+So Slow Start is as good as the best simple rule here, not better. What the simple rule cannot do is start
+on day one; it needs four weeks of history. The protocol and every table are in
+[`results/steps.summary.md`](results/steps.summary.md) and [`results/steps.sweep.md`](results/steps.sweep.md).
 
 ## How it works
 

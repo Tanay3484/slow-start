@@ -90,30 +90,33 @@ function fillEvidence(): void {
     el.textContent = el.dataset.fmt === "pct" ? pct(v) : fmtInt(v);
   });
   const ev = evidence as Ev;
-  const rows: [string, keyof Ev["final_v1"]["policies"], boolean][] = [
+  // Every row comes from the same runs: the controller at the step chosen on validation.
+  const rows: [string, keyof Ev["sweep_final"]["policies"], boolean][] = [
     ["Fixed 10,000", "fixed_10000", false],
     ["Your 28-day median", "trailing_median_28d", false],
     ["Your 30th percentile", "own_p30_28d", true],
     ["TabPFN 30th percentile", "tabpfn_p30_cap", true],
+    ["Slow Start (rules + TabPFN cap)", "controller_tabpfn_cap", true],
   ];
   const body = document.getElementById("ev-rows")!;
   for (const [label, key, strong] of rows) {
-    const val = ev.validation_v1.policies[key];
-    const fin = ev.final_v1.policies[key];
+    const val = ev.sweep_validation.policies[key];
+    const fin = ev.sweep_final.policies[key];
     body.append(
       h("tr", { class: strong ? "strong" : "" },
         h("td", {}, label),
         h("td", {}, pct(val.goal_met)),
         h("td", {}, pct(fin.goal_met)),
-        h("td", {}, fmtInt(fin.mean_goal)),
+        h("td", {}, `${Math.round(fin.goal_level * 100)}%`),
       ),
     );
   }
-  const d = (k: "validation_v1" | "final_v1") => (ev[k].policies.tabpfn_p30_cap.goal_met - ev[k].policies.own_p30_28d.goal_met) * 100;
+  const vs = ev.sweep_final.policies.controller_tabpfn_cap.vs_p30 as number[];
+  const signed = (x: number) => `${x >= 0 ? "+" : "−"}${Math.abs(x * 100).toFixed(1)}`;
   document.getElementById("ev-note")!.textContent =
     `${ev.final_v1.people} people, ${fmtInt(ev.validation_v1.person_days)} validation and ${fmtInt(ev.final_v1.person_days)} final person-days. ` +
-    `TabPFN against the plain percentile: ${d("validation_v1") >= 0 ? "+" : ""}${d("validation_v1").toFixed(1)} points on validation, ` +
-    `${d("final_v1") >= 0 ? "+" : ""}${d("final_v1").toFixed(1)} on the final window. A tie. Lower goals are always easier to meet, so read goal met together with the mean goal.`;
+    `"Asks for" is the goal as a share of the person's usual day: lower goals are always easier to meet, so read the two together. ` +
+    `Slow Start against the plain percentile on the final window: ${signed(vs[0])} points (95% interval ${signed(vs[1])} to ${signed(vs[2])}). A tie.`;
 }
 
 function waffle(): void {

@@ -1,0 +1,97 @@
+{
+  "generated": "2026-10-25",
+  "dry_run": false,
+  "predictor": "tabpfn-v2",
+  "tabpfn_package": "9.2.0",
+  "n_estimators": 4,
+  "features": "v1",
+  "until": "2016-04-28",
+  "data": "Kaggle 'Fitbit Fitness Tracker Data' (arashnic/fitbit), CC0, 2016-03-12 to 2016-05-12",
+  "people_loaded": 35,
+  "person_days_loaded": 981,
+  "not_worn_excluded": 94,
+  "controller_written": true,
+  "params": {
+    "start": 1500,
+    "floor": 1000,
+    "ceiling": 20000,
+    "ai": 1500
+  },
+  "window_start": "2016-04-15",
+  "person_days": 406,
+  "people": 33,
+  "rows": [
+    {
+      "policy": "fixed_10000",
+      "label": "Fixed 10,000",
+      "goal_met": 0.3620689655172414,
+      "mean_goal": 10000.0,
+      "goal_level": 1.5983446767362859,
+      "vs_baseline": [
+        -0.27832512315270935,
+        -0.41346153846153844,
+        -0.1457938569682154
+      ]
+    },
+    {
+      "policy": "trailing_median_28d",
+      "label": "Own 28-day median",
+      "goal_met": 0.5394088669950738,
+      "mean_goal": 8368.539408866995,
+      "goal_level": 1.0269415564598692,
+      "vs_baseline": [
+        -0.10098522167487689,
+        -0.13066923076923076,
+        -0.07316499282639895
+      ]
+    },
+    {
+      "policy": "own_p30_28d",
+      "label": "Own 28-day 30th percentile",
+      "goal_met": 0.6403940886699507,
+      "mean_goal": 7009.327586206897,
+      "goal_level": 0.8342236011591391,
+      "vs_baseline": null
+    },
+    {
+      "policy": "tabpfn_p30_cap",
+      "label": "TabPFN 30th percentile (cap alone)",
+      "goal_met": 0.6798029556650246,
+      "mean_goal": 6808.743842364532,
+      "goal_level": 0.8592932728420022,
+      "vs_baseline": [
+        0.039408866995073843,
+        -0.0028886425227889236,
+        0.08352157563124235
+      ]
+    },
+    {
+      "policy": "controller",
+      "label": "Controller (slow start / AIMD)",
+      "goal_met": 0.6748768472906403,
+      "mean_goal": 6197.054187192119,
+      "goal_level": 0.8274626967289165,
+      "vs_baseline": [
+        0.03448275862068961,
+        -0.025333662507107186,
+        0.09327424028318983
+      ]
+    },
+    {
+      "policy": "controller_tabpfn_cap",
+      "label": "Controller + TabPFN cap",
+      "goal_met": 0.7364532019704434,
+      "mean_goal": 6139.5344827586205,
+      "goal_level": 0.7865872915125734,
+      "vs_baseline": [
+        0.09605911330049266,
+        0.04347272928421293,
+        0.14858929128333065
+      ]
+    }
+  ],
+  "cap_calibration": {
+    "tabpfn_p30_cap": 0.6798029556650246,
+    "own_p30_28d": 0.6403940886699507
+  }
+}
