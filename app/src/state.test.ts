@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { loadState, newState, saveState } from "./state";
+import { loadState, newState, saveState, savedMode } from "./state";
 
 // A tiny in-memory localStorage for node.
 class MemoryStorage {
@@ -41,5 +41,20 @@ describe("saves", () => {
     store.setItem("slowstart.demo.v1", JSON.stringify({ ...newState("demo"), seen: ["starpebble"], demoIndex: 12 }));
     expect(loadState("demo").seen).toEqual([]);
     expect(store.keys()).not.toContain("slowstart.demo.v1");
+  });
+});
+
+describe("modes", () => {
+  it("opening the game after watching the demo is live play, never the demo", () => {
+    saveState({ ...newState("demo", "Demo person"), demoIndex: 12 });
+    expect(savedMode()).toBe("live");
+    expect(store.keys()).not.toContain("slowstart.demo.v1");
+  });
+
+  it("clears the mode an older build remembered", () => {
+    store.setItem("slowstart.mode", "demo");
+    loadState("live");
+    expect(store.keys()).not.toContain("slowstart.mode");
+    expect(savedMode()).toBe("live");
   });
 });

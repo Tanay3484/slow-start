@@ -1,3 +1,4 @@
+import { importCard } from "./importer";
 import type { Controller } from "../controller";
 import { dayOf, hpLeft, statsOf } from "../game/day";
 import { CREATURES, HABITAT_LABEL, STAGE_NAMES } from "../game/creatures";
@@ -221,8 +222,15 @@ export function stagePanel(c: Controller): HTMLElement {
 export function homeScreen(c: Controller): HTMLElement {
   const root = h("div", { class: "screen home" });
   const day = c.day;
+  if (c.isDemo && !c.demoOver) {
+    root.append(h("section", { class: "card demo-banner" },
+      h("p", {}, h("b", {}, "You are watching the demo: "), "one real person's 40 days from a public dataset. Nothing here is yours."),
+      h("button", { class: "btn primary", onclick: () => void c.switchMode("live") }, "Play for real ▶")));
+  }
   if (c.say) root.append(h("p", { class: `say ${c.say.kind}`, role: "status" }, c.say.text));
-  root.append(goalCard(c, day), stepsCard(c, day), trainCard(c));
+  root.append(goalCard(c, day), stepsCard(c, day));
+  if (!c.isDemo) root.append(importCard(c));
+  root.append(trainCard(c));
   const chart = trendChart(c.s.days.map((d) => dayOf(c.s, d.date)!));
   if (chart) root.append(h("section", { class: "card" }, h("h2", {}, "Goal against steps"), chart, h("p", { class: "meta" }, "Gold line: your goal. Bars: your steps (green: caught, red: got away). Watch it double, then halve, then creep up.")));
   if (c.demoOver) {

@@ -240,3 +240,12 @@ details.why ul { padding-left: 18px; margin: 6px 0; }
 .issue-help { margin: -8px 0 16px; font-size: 14px; }
 .issue-help a { color: var(--cyan); }
 .card .meta a { color: var(--cyan); }
+button.chip.switch, a.chip.mode { cursor: pointer; font-family: inherit; text-decoration: none; color: inherit; }
+button.chip.switch { color: var(--gold); min-height: 32px; padding: 6px 10px; }
+button.chip.switch:hover, a.chip.mode:hover { border-color: var(--cyan); }
+.demo-banner { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; border-color: var(--gold); }
+.demo-banner p { margin: 0; flex: 1 1 240px; }
+.card.import h3 { margin: 16px 0 6px; font: 9px/1.6 var(--pixel); color: var(--gold); text-transform: uppercase; }
+.card.import .row.file { flex-wrap: wrap; align-items: center; }
+.card.import .row.file input[type="file"] { flex: 1 1 220px; min-width: 0; }
+.card.import .say { margin-top: 14px; }

@@ -44,7 +44,9 @@ function render(): void {
       nav,
       h("div", { class: "top-right" },
         h("a", { class: "top-link", href: "./guide.html" }, "Guide"),
-        c.isDemo ? h("span", { class: "chip warn mode" }, "Demo") : h("span", { class: "chip mode" }, "Live"),
+        c.isDemo
+          ? h("button", { class: "chip warn mode switch", title: "Leave the demo and start your own", onclick: () => void c.switchMode("live") }, "Demo · Play for real ▶")
+          : h("a", { class: "chip mode", href: "./play.html?demo=1", title: "You are playing for real. Tap to watch the demo." }, "Live"),
       ),
     );
     const layout = h("div", { class: `layout tab-${c.tab}` }, stagePanel(c), h("main", { class: "panel" }, screen()));
