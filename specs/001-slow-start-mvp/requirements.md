@@ -33,6 +33,11 @@ this spec is provisional until Tanay approves it.
 - R1.8 IF the predictor is unavailable or fails, THEN the system SHALL cap the goal at 80% of the trailing
   14-day median, and SHALL say `cap_source: "median"` in the response.
 - R1.9 The goal SHALL never exceed the ceiling (20,000 steps) nor fall below the floor (1,000 steps).
+- R1.10 (added 2026-10-26, after the first user's import) WHEN the history holds at least 7 imported days
+  (steps and no goal) before the first day that had a goal, the controller SHALL start from the person's
+  own 30th percentile of the last 28 of those days instead of the default start, like TCP reusing a cached
+  ssthresh for a host it has seen before. It is computed from the imported days only, so it does not move
+  as new days are played. Without imported history the start stays 1,500.
 
 ## R2 Exercise goals
 

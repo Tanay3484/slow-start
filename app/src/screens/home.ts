@@ -28,7 +28,7 @@ function bubbleText(c: Controller, day: DayRecord): string {
 }
 
 function trendChart(days: DayRecord[]): SVGElement | null {
-  const rows = days.filter((d) => d.goal !== null).slice(-14);
+  const rows = days.filter((d) => d.goal !== null || d.steps !== null).slice(-14);
   if (rows.length < 2) return null;
   const W = 300;
   const H = 90;
@@ -48,14 +48,16 @@ function trendChart(days: DayRecord[]): SVGElement | null {
     bar.setAttribute("y", String(top));
     bar.setAttribute("width", String(Math.max(2, bw - 4)));
     bar.setAttribute("height", String(H - 4 - top));
-    bar.setAttribute("class", d.outcome === "win" ? "bar win" : d.outcome === "miss" ? "bar miss" : "bar");
+    bar.setAttribute("class", d.goal === null ? "bar past" : d.outcome === "win" ? "bar win" : d.outcome === "miss" ? "bar miss" : "bar");
     svg.append(bar);
   });
-  const pts = rows.map((d, i) => `${i * bw + bw / 2},${y(d.goal ?? 0)}`).join(" ");
-  const line = document.createElementNS(ns, "polyline");
-  line.setAttribute("points", pts);
-  line.setAttribute("class", "goal-line");
-  svg.append(line);
+  const pts = rows.flatMap((d, i) => (d.goal === null ? [] : [`${i * bw + bw / 2},${y(d.goal)}`]));
+  if (pts.length >= 2) {
+    const line = document.createElementNS(ns, "polyline");
+    line.setAttribute("points", pts.join(" "));
+    line.setAttribute("class", "goal-line");
+    svg.append(line);
+  }
   return svg;
 }
 
@@ -71,6 +73,7 @@ function goalCard(c: Controller, day: DayRecord): HTMLElement {
   if (goal) {
     const phase = PHASE_TEXT[goal.phase];
     const chips = h("div", { class: "chips" }, h("span", { class: `chip ${goal.phase}` }, phase.chip));
+    if (goal.from_history) chips.append(h("span", { class: "chip good", title: "The controller started from your imported history" }, "From your history"));
     if (goal.source !== "controller") {
       chips.append(h("span", { class: "chip warn", title: goal.note }, goal.source === "offline" ? "Offline goal" : "Baseline goal"));
     }
@@ -89,6 +92,7 @@ function goalCard(c: Controller, day: DayRecord): HTMLElement {
         h("p", {}, phase.why),
         h("ul", {},
           h("li", {}, h("b", {}, "Window "), `${fmt(goal.window)}: what the controller asks for.`),
+          goal.from_history ? h("li", {}, h("b", {}, "Start "), `${fmt(goal.from_history)}, from your imported history (your own 30th percentile of the last 28 imported days), not the usual 1,500. Like TCP remembering a host it has seen before.`) : null,
           h("li", {}, h("b", {}, "Cap "), capText),
           h("li", {}, h("b", {}, "Goal "), "the lower of the two. Like TCP: the sender's window and the receiver's window."),
         ),
@@ -120,6 +124,11 @@ function stepsCard(c: Controller, day: DayRecord): HTMLElement {
     return card;
   }
 
+  const latest = [...c.s.days].reverse().find((d) => d.date < day.date && d.goal === null && d.steps !== null);
+  if (latest) {
+    const when = new Date(`${latest.date}T12:00:00`).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+    card.append(h("p", { class: "meta imported" }, `Latest from your import: ${when}, ${fmt(latest.steps ?? 0)} steps. Today's steps are logged here.`));
+  }
   const input = h("input", { type: "number", inputmode: "numeric", min: 0, max: 100000, placeholder: "Steps today", "aria-label": "Steps today", value: day.steps ?? "" });
   const save = () => {
     const n = Number(input.value);
@@ -232,7 +241,7 @@ export function homeScreen(c: Controller): HTMLElement {
   if (!c.isDemo) root.append(importCard(c));
   root.append(trainCard(c));
   const chart = trendChart(c.s.days.map((d) => dayOf(c.s, d.date)!));
-  if (chart) root.append(h("section", { class: "card" }, h("h2", {}, "Goal against steps"), chart, h("p", { class: "meta" }, "Gold line: your goal. Bars: your steps (green: caught, red: got away). Watch it double, then halve, then creep up.")));
+  if (chart) root.append(h("section", { class: "card" }, h("h2", {}, "Goal against steps"), chart, h("p", { class: "meta" }, "Gold line: your goal. Bars: your steps (green: caught, red: got away, grey: imported history). Watch it double, then halve, then creep up.")));
   if (c.demoOver) {
     root.append(h("section", { class: "card" }, h("h2", {}, "That's the whole story"), h("p", {}, "These were one real person's 40 days from a public dataset. Start your own, or watch it again."),
       h("div", { class: "row" }, h("button", { class: "btn primary", onclick: () => void c.switchMode("live") }, "Play for real"), h("button", { class: "btn", onclick: () => void c.restartDemo() }, "Watch again"))));

@@ -20,6 +20,8 @@ export interface Goal {
   /** "offline" is only ever set by the app, when the backend could not be reached. */
   source: "controller" | "fallback" | "offline";
   note: string;
+  /** R1.10: where the controller started, taken from imported history (absent for a new person). */
+  from_history?: number | null;
 }
 
 export interface SetLog {

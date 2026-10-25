@@ -249,3 +249,5 @@ button.chip.switch:hover, a.chip.mode:hover { border-color: var(--cyan); }
 .card.import .row.file { flex-wrap: wrap; align-items: center; }
 .card.import .row.file input[type="file"] { flex: 1 1 220px; min-width: 0; }
 .card.import .say { margin-top: 14px; }
+.trend .bar.past { fill: #3b4563; }
+.meta.imported { color: var(--green); }
