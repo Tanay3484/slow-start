@@ -120,3 +120,14 @@ def test_baseline_policies_run_on_every_exercise():
 
 def test_dayresult_import_for_type_checkers():
     assert DayResult(date=D0, steps=1).steps == 1
+
+
+def test_top_set_scheme_uses_only_sessions_before_the_window():
+    def squat(day, top_reps):
+        sets = [SetResult(weight_kg=60.0, reps=8), SetResult(weight_kg=100.0, reps=top_reps)]
+        return Session(date=D0 + dt.timedelta(days=day), exercise="squat", sets=sets)
+
+    sessions = [squat(0, 3), squat(2, 3), squat(4, 5), squat(10, 9), squat(12, 9)]
+    out = training_eval.top_set_params(sessions, D0 + dt.timedelta(days=10), ExerciseParams())
+    assert (out.scheme["squat"].sets, out.scheme["squat"].reps) == (1, 3)  # median of 3, 3, 5
+    assert out.scheme["bench_press"] == ExerciseParams().scheme["bench_press"]  # never logged

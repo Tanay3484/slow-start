@@ -274,11 +274,11 @@ h3 { margin: 0 0 10px; font-size: 11px; line-height: 1.6; color: var(--gold); }
 /* ---------------------------------------------------------------- field guide */
 .guide-link { margin-top: 30px; }
 .guide-top {
-  position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 20px; background: rgba(20, 22, 38, 0.92); border-bottom: 3px solid var(--line); backdrop-filter: blur(6px);
+  position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 10px 18px; justify-content: space-between; align-items: center;
+  padding: 14px 16px; background: rgba(20, 22, 38, 0.92); border-bottom: 3px solid var(--line); backdrop-filter: blur(6px);
 }
 .guide-top .brand { font: 14px var(--pixel); color: var(--gold); text-decoration: none; text-shadow: 0 2px 0 var(--shadow); }
-.guide-top nav { display: flex; gap: 18px; }
+.guide-top nav { display: flex; flex-wrap: wrap; gap: 10px 18px; }
 .guide-top nav a { font: 9px var(--pixel); color: var(--muted); text-decoration: none; text-transform: uppercase; }
 .guide-top nav a:hover { color: var(--text); }
 .guide-hero h1 { margin: 0 0 18px; font-size: clamp(22px, 3.4vw, 36px); line-height: 1.4; color: var(--gold); text-shadow: 0 3px 0 #9a4a26, 0 6px 0 var(--shadow); }
@@ -322,3 +322,32 @@ h3 { margin: 0 0 10px; font-size: 11px; line-height: 1.6; color: var(--gold); }
 .beast dd { margin: 0; color: var(--muted); }
 .trivia-label { margin: 0 0 6px; font: 8px var(--pixel); color: var(--green); text-transform: uppercase; }
 .trivia { margin: 0; padding-left: 18px; font-size: 14px; color: var(--muted); display: grid; gap: 4px; }
+
+/* export guide */
+.export canvas[data-icon] { width: 48px; height: 48px; image-rendering: pixelated; flex: none; }
+.sources { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 26px; max-width: 760px; }
+@media (min-width: 800px) { .sources { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.source {
+  display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 10px; text-align: center;
+  border-radius: 8px; background: var(--panel); border: 3px solid var(--line); box-shadow: 0 4px 0 0 var(--shadow);
+  color: var(--text); text-decoration: none; transition: border-color 0.2s, transform 0.2s;
+}
+.source:hover, .source:focus-visible { border-color: var(--cyan); transform: translateY(-2px); }
+.source b { font: 10px/1.5 var(--pixel); color: var(--gold); }
+.source span { font-size: 13px; color: var(--muted); }
+.how { margin-top: 22px; max-width: 860px; scroll-margin-top: 24px; }
+.how header { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+.how h3 { margin: 0; font: 13px/1.5 var(--pixel); color: var(--gold); }
+.how ol { margin: 0 0 14px; padding-left: 22px; line-height: 1.7; }
+.how li + li { margin-top: 4px; }
+.how a, .issue-cta a { color: var(--cyan); }
+.how code, .rules-two code { font-size: 0.92em; background: var(--ink); padding: 1px 6px; border-radius: 4px; word-break: break-word; }
+.how .file { margin: 0 0 10px; padding: 10px 12px; border-left: 4px solid var(--green); background: rgba(56, 183, 100, 0.12); border-radius: 4px; }
+.how .meta { color: var(--muted); font-size: 15px; margin: 0; }
+.how .sample { background: var(--ink); padding: 12px 14px; border-radius: 6px; overflow-x: auto; font-size: 14px; }
+.rules-two { display: grid; gap: 18px; margin-top: 18px; max-width: 980px; }
+@media (min-width: 800px) { .rules-two { grid-template-columns: 1fr 1fr; } }
+.rules-two h3 { margin: 0 0 10px; font: 12px/1.5 var(--pixel); color: var(--gold); }
+.rules-two ul { margin: 0; padding-left: 20px; line-height: 1.65; }
+.rules-two li + li { margin-top: 6px; }
+.issue-cta { margin-top: 28px; }

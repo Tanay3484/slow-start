@@ -139,6 +139,8 @@ def create_app(services: Services | None = None) -> FastAPI:
                 page = "play.html"
             elif route.startswith("guide"):
                 page = "guide.html"
+            elif route.startswith("export"):
+                page = "export.html"
             if not (static / page).is_file():
                 page = "index.html"
             return FileResponse(static / page, headers={"Cache-Control": "no-cache"})

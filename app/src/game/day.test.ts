@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { newState } from "../state";
 import type { DayRecord } from "../types";
-import { addDays, emptyDay, historyFor, hpLeft, outcomeOf, settle, statsOf, todayISO, totalXp, xpOfDay } from "./day";
+import { HISTORY_DAYS, addDays, emptyDay, historyFor, hpLeft, outcomeOf, settle, statsOf, todayISO, totalXp, xpOfDay } from "./day";
 
 const rec = (over: Partial<DayRecord>): DayRecord => ({ ...emptyDay("2026-10-20"), goal: 4000, ...over });
 
@@ -47,6 +47,12 @@ describe("day helpers", () => {
   it("historyFor excludes today and later (the backend must not see them)", () => {
     const s = { ...newState("live"), days: [rec({}), rec({ date: "2026-10-21" }), rec({ date: "2026-10-22" })] };
     expect(historyFor(s, "2026-10-21").map((d) => d.date)).toEqual(["2026-10-20"]);
+  });
+  it("historyFor sends at most the last HISTORY_DAYS days (the backend refuses over 800)", () => {
+    const days = Array.from({ length: 1000 }, (_, i) => rec({ date: addDays("2024-01-01", i), steps: 3000 }));
+    const out = historyFor({ ...newState("live"), days }, addDays("2024-01-01", 1000));
+    expect(out).toHaveLength(HISTORY_DAYS);
+    expect(out[out.length - 1].date).toBe(addDays("2024-01-01", 999));
   });
 });
 

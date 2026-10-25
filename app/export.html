@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#141626" />
+    <meta name="description" content="How to export your steps from Google Fit or a Fitbit / Pixel Watch, and your workouts from Hevy, and load them into Slow Start." />
+    <link rel="icon" href="./icon-192.png" />
+    <title>Slow Start: bring your data</title>
+  </head>
+  <body class="site guide export">
+    <header class="guide-top">
+      <a class="brand" href="./">Slow Start</a>
+      <nav>
+        <a href="./">Home</a>
+        <a href="./guide.html">Guide</a>
+        <a href="./play.html?demo=1">Demo</a>
+        <a href="./play.html">Play</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="sec guide-hero">
+        <div class="wrap">
+          <p class="eyebrow">Bring your data</p>
+          <h1>Your history sets tomorrow's goal</h1>
+          <p class="lead">
+            Export once and upload the file in the game's <b>Data</b> tab. Slow Start still starts small and
+            doubles, but your history sets the ceiling: TabPFN reads it and tomorrow's goal never asks for more
+            than you will probably manage. About ten minutes of clicking. The server reads the file in memory
+            and keeps nothing; your history stays on your device.
+          </p>
+          <div class="sources" role="list">
+            <a class="source" role="listitem" href="#google-fit"><canvas data-icon="phone" width="16" height="16" aria-hidden="true"></canvas><b>Google Fit</b><span>steps from your phone</span></a>
+            <a class="source" role="listitem" href="#fitbit"><canvas data-icon="watch" width="16" height="16" aria-hidden="true"></canvas><b>Fitbit / Pixel Watch</b><span>steps from your wrist</span></a>
+            <a class="source" role="listitem" href="#hevy"><canvas data-icon="dumbbell" width="16" height="16" aria-hidden="true"></canvas><b>Hevy</b><span>workouts, optional</span></a>
+            <a class="source" role="listitem" href="#csv"><canvas data-icon="sheet" width="16" height="16" aria-hidden="true"></canvas><b>Any CSV</b><span>date and steps</span></a>
+          </div>
+        </div>
+      </section>
+
+      <section class="sec alt" id="steps">
+        <div class="wrap">
+          <p class="eyebrow">Steps</p>
+          <h2>Pick one source of steps</h2>
+          <p class="narrow-left">
+            If you wear a watch every day, use the watch's export. If your phone is what you carry, use Google Fit.
+            Upload one of them, not both: they count the same steps.
+          </p>
+
+          <article class="how card" id="google-fit">
+            <header><canvas data-icon="phone" width="16" height="16" aria-hidden="true"></canvas><h3>Google Fit</h3></header>
+            <ol>
+              <li>Open <a href="https://takeout.google.com" target="_blank" rel="noopener">takeout.google.com</a> and press <b>Deselect all</b>.</li>
+              <li>Scroll to <b>Fit</b>, tick it, then <b>Next step</b>.</li>
+              <li>Choose <b>Export once</b>, file type <b>.zip</b>, and <b>Create export</b>. Google emails a link when it is ready: minutes for some people, a few hours for others.</li>
+              <li>Download and unzip it.</li>
+            </ol>
+            <p class="file">Upload <code>Takeout/Fit/Daily activity metrics/Daily activity metrics.csv</code></p>
+            <p class="meta">
+              That one file has a row per day, already merged across your phone and watch. The folder next to it is
+              full of files named by date (one day each, in 15-minute slots), and <code>All Data</code> has a raw
+              stream per device. Skip those: the per-device streams overlap, so adding them up counts your steps
+              twice. Upload the wrong one and the app says so and names the right file.
+            </p>
+          </article>
+
+          <article class="how card" id="fitbit">
+            <header><canvas data-icon="watch" width="16" height="16" aria-hidden="true"></canvas><h3>Fitbit / Pixel Watch</h3></header>
+            <ol>
+              <li>In the <b>Fitbit</b> app, tap your profile picture, then <b>Manage data and privacy</b> (or Settings, <b>Your data</b>) and <b>Export your data</b>. It opens Google Takeout with Fitbit selected.</li>
+              <li>Or go straight to <a href="https://takeout.google.com" target="_blank" rel="noopener">takeout.google.com</a>, <b>Deselect all</b>, and tick only <b>Fitbit</b>.</li>
+              <li><b>Export once</b>, <b>.zip</b>, <b>Create export</b>, then download and unzip it when the email arrives.</li>
+            </ol>
+            <p class="file">Upload every <code>steps-*.json</code> in <code>Takeout/Fitbit/Global Export Data/</code> (select them all at once)</p>
+            <p class="meta">There is one file per month. Menu names move between app versions; if yours look different, the Takeout route always works.</p>
+          </article>
+
+          <article class="how card" id="csv">
+            <header><canvas data-icon="sheet" width="16" height="16" aria-hidden="true"></canvas><h3>Any CSV</h3></header>
+            <p>Samsung Health, Garmin, a spreadsheet you keep by hand: anything that becomes two columns works.</p>
+            <pre class="sample">date,steps
+2026-10-20,4438
+2026-10-21,8799</pre>
+            <p class="meta">Dates as <code>2026-10-21</code>, <code>10/21/2026</code> or <code>21 Oct 2026</code>. One person per file.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="sec" id="hevy">
+        <div class="wrap">
+          <p class="eyebrow">Workouts (optional)</p>
+          <h2>Hevy</h2>
+          <article class="how card">
+            <header><canvas data-icon="dumbbell" width="16" height="16" aria-hidden="true"></canvas><h3>Export your workouts</h3></header>
+            <ol>
+              <li>In the <b>Hevy</b> app: <b>Profile</b>, the gear (<b>Settings</b>), <b>Export &amp; Import Data</b>, <b>Export Workouts</b>.</li>
+              <li>It saves or shares a <code>workouts.csv</code>. On the web, the same option is in Settings at hevy.com.</li>
+            </ol>
+            <p class="file">Upload <code>workouts.csv</code></p>
+            <p class="meta">Training is a bonus, never a requirement: skipping it costs nothing and never changes your step goal.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="sec alt" id="cleaner">
+        <div class="wrap">
+          <p class="eyebrow">What happens to your file</p>
+          <h2>The cleaner, in plain words</h2>
+          <div class="rules-two">
+            <div class="card">
+              <h3>Steps</h3>
+              <ul>
+                <li>A day under <b>500 steps</b> is a phone or watch left behind, not a real day. It counts as rest: no miss, no penalty.</li>
+                <li>A blank day in Google Fit is the same.</li>
+                <li>Today is never imported, so a half-finished export day cannot count as a miss.</li>
+                <li>Goals look at your latest <b>365 days</b>; older history is kept on your device.</li>
+                <li>Close-but-wrong files (one Google Fit day, a per-device stream) are refused, and the message names the right file.</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Workouts</h3>
+              <ul>
+                <li>Warm-up sets and sets with no reps are skipped.</li>
+                <li>Assisted and weighted pull-ups and dips are left out: bodyweight moves are scored on reps alone.</li>
+                <li>Only the lifts the game plans are used (squat, bench, deadlift, overhead press, rows, a few dumbbell lifts, push-ups, pull-ups, dips). The rest are counted and listed, never silently lost.</li>
+              </ul>
+            </div>
+          </div>
+          <p class="narrow-left issue-cta">
+            Not sure, or the wrong numbers showing? <a id="issue-link" href="https://github.com/Tanay3484/slow-start/issues/new?template=import-problem.yml" target="_blank" rel="noopener">Raise an issue on GitHub</a>
+            and we will teach the cleaner your case. The form asks for the file name and the first few lines, never the whole export.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <div class="wrap">
+        <p>Google Fit, Fitbit, Pixel Watch and Hevy belong to their owners. The icons here are original pixel drawings, not their logos, and Slow Start is not affiliated with any of them.</p>
+        <p class="small"><a href="./">Back to Slow Start</a> · <a href="https://github.com/Tanay3484/slow-start">Source</a></p>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/site/export.ts"></script>
+  </body>
+</html>

@@ -115,6 +115,10 @@ this spec is provisional until Tanay approves it.
 - R8.4 The results SHALL be written to `results/` with the data source, the date, the rows used and the
   exclusions (not-worn days).
 - R8.5 The post SHALL quote only numbers from `results/`.
+- R8.6 (added 2026-10-26, after seeing the first user's log; exploratory) The training results SHALL
+  also be reported scored on the **top set**: one working set per session, at the person's usual top-set
+  reps taken from sessions before the held-out window. The fixed-scheme table stays, and the post SHALL
+  say the top-set table was added after the fixed scheme failed on real data.
 
 ## R9 Open and operable
 

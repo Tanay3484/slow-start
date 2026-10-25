@@ -78,10 +78,15 @@ export function statsOf(days: readonly DayRecord[], workouts: readonly WorkoutLo
   };
 }
 
+/** How many days back the backend is sent. It refuses more than 800, and years of imported history
+ *  would only make TabPFN slower: the cap's features look back four weeks. */
+export const HISTORY_DAYS = 365;
+
 /** Days before `today` as the backend wants them. Imported days have no goal; they still feed the cap. */
 export function historyFor(state: State, today: string) {
   return state.days
     .filter((d) => d.date < today)
+    .slice(-HISTORY_DAYS)
     .map((d) => ({ date: d.date, steps: d.steps, goal: d.goal, excused: d.excused }));
 }
 

@@ -172,12 +172,14 @@ def test_play_route_serves_the_game_page(tmp_path, settings):
     (tmp_path / "index.html").write_text("landing")
     (tmp_path / "play.html").write_text("game")
     (tmp_path / "guide.html").write_text("guide")
+    (tmp_path / "export.html").write_text("export")
     s = settings.model_copy(update={"static_dir": str(tmp_path)})
     c = TestClient(create_app(Services(settings=s, predictor=None, llm=None)))
     assert c.get("/").text == "landing"
     assert c.get("/play").text == "game"
     assert c.get("/play.html").text == "game"
     assert c.get("/guide").text == "guide"
+    assert c.get("/export").text == "export"
     assert c.get("/anything-else").text == "landing"
 
 

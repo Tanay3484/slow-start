@@ -237,3 +237,6 @@ details.why ul { padding-left: 18px; margin: 6px 0; }
   .bar i { transition: none; }
   .waking { animation: none; }
 }
+.issue-help { margin: -8px 0 16px; font-size: 14px; }
+.issue-help a { color: var(--cyan); }
+.card .meta a { color: var(--cyan); }
