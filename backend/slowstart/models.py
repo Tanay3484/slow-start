@@ -118,6 +118,8 @@ DEFAULT_SCHEME: dict[str, ExerciseSpec] = {
 class StepGoalRequest(BaseModel):
     today: dt.date
     history: list[DayResult] = Field(default_factory=list, max_length=800)
+    # False: the controller's window alone, no cap. The website's "try the controller" uses it.
+    use_cap: bool = True
 
 
 class ExerciseGoalRequest(BaseModel):
@@ -147,5 +149,7 @@ class Checkin(Frozen):
     energy: Literal["low", "ok", "high"]
     body: list[str]
     excused: bool
-    line: str
+    line: str  # Slumbrock's reaction: from Gemma, or a template
+    tip: str = ""  # chosen by code from a curated list, never by the model
+    aside: str = ""  # now and then, a rock joke
     source: Literal["gemma", "template"]

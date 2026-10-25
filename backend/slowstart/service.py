@@ -7,7 +7,7 @@ from collections.abc import Sequence
 
 from slowstart.config import Settings
 from slowstart.controllers import guard
-from slowstart.models import DayResult, ExerciseGoal, ExerciseParams, Goal, Session, StepParams
+from slowstart.models import Cap, DayResult, ExerciseGoal, ExerciseParams, Goal, Session, StepParams
 from slowstart.prediction.cap import compute_cap
 from slowstart.prediction.predictor import Predictor
 
@@ -24,11 +24,12 @@ def step_goal(
     predictor: Predictor | None,
     settings: Settings,
     params: StepParams | None = None,
+    use_cap: bool = True,
 ) -> Goal:
     params = params or StepParams()
     days = clean_history(history, today)
     decision, source = guard.step_window(days, today, params)
-    cap = compute_cap(days, today, predictor, settings, params)
+    cap = compute_cap(days, today, predictor, settings, params) if use_cap else Cap(source="none")
     goal = decision.window if cap.value is None else min(decision.window, cap.value)
     goal = int(min(max(goal, params.floor), params.ceiling))
     notes = []

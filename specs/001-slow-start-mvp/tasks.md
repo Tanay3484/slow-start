@@ -158,6 +158,15 @@ File: `app/src/game/xp.ts` · Functions: `xpForDay(d) -> number` and `stageForXp
 - [x] T21 `@ai` Import, export and delete screens. R3, R7.3
 - [x] T22 `@ai` Contract tests for H4 and app logic. R4
 
+## Website and motion (Draft 2)
+
+- [x] T28 `@ai` Sprites redrawn at 32 and 48 px with lit shading, outlines and animation frames. R4.10, R10.4
+- [x] T29 `@ai` Arena engine: scenes per habitat and time, entrance, attack, capture, companions, evolution,
+  taps, ambient particles, reduced motion. R10.4, R10.6
+- [x] T30 `@ai` Responsive game layout with the arena pinned on wide screens. R10.5
+- [x] T31 `@ai` Landing page: scroll story, evidence from `results/`, controller widget, creature cards.
+  R10.1-R10.3
+
 ## Ship
 
 - [ ] T23 `@ai` Capacitor Android project, debug APK, GitHub release. R7.2

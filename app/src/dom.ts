@@ -20,3 +20,34 @@ export function h<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Attrs = 
 }
 
 export const fmt = (n: number) => n.toLocaleString("en-US");
+
+/** A tiny pixel icon from an 8x8 bitmap ('#' filled), drawn in the current text colour. */
+export function pixelIcon(rows: string[]): SVGSVGElement {
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", "0 0 8 8");
+  svg.setAttribute("class", "ico");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("shape-rendering", "crispEdges");
+  rows.forEach((row, y) =>
+    [...row].forEach((ch, x) => {
+      if (ch !== "#") return;
+      const r = document.createElementNS(ns, "rect");
+      r.setAttribute("x", String(x));
+      r.setAttribute("y", String(y));
+      r.setAttribute("width", "1");
+      r.setAttribute("height", "1");
+      r.setAttribute("fill", "currentColor");
+      svg.append(r);
+    }),
+  );
+  return svg;
+}
+
+export const ICONS: Record<string, string[]> = {
+  today: ["...##...", "..####..", "..####..", "...###..", ".##.....", "####....", "####....", ".##....."],
+  talk: [".######.", "########", "##.##.##", "########", ".######.", "..##....", ".#......", "........"],
+  places: ["..####..", ".##..##.", ".##..##.", "..####..", "...##...", "...##...", "....#...", "........"],
+  dex: ["###.###.", "#.#.#.#.", "###.###.", "........", "###.###.", "#.#.#.#.", "###.###.", "........"],
+  data: ["#######.", "#.###.##", "#.###..#", "#......#", "#.####.#", "#.####.#", "#######.", "........"],
+};

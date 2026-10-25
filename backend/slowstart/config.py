@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     ollama_url: str = "http://localhost:11434"
     model: str = "gemma3:1b"
     llm_timeout_s: float = 60.0
-    llm_num_predict: int = 160
+    llm_num_predict: int = 240
     llm_num_thread: int | None = None
 
     # Steps cap (the "receiver window"). See specs/001-slow-start-mvp/design.md section 3.

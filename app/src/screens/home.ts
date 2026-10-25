@@ -182,8 +182,8 @@ function trainCard(c: Controller): HTMLElement {
   return card;
 }
 
-export function homeScreen(c: Controller): HTMLElement {
-  const root = h("div", { class: "screen home" });
+/** The arena and everything about Slumbrock. On a wide screen it stays pinned beside every tab. */
+export function stagePanel(c: Controller): HTMLElement {
   const day = c.day;
   const xp = c.xp;
   const stage = stageOf(xp);
@@ -195,20 +195,19 @@ export function homeScreen(c: Controller): HTMLElement {
 
   c.syncArena();
   const hpPct = day.goal === null ? 100 : Math.round((left / goal) * 100);
-  const arena = h("div", { class: "arena-wrap" },
-    c.arena.el,
-    h("div", { class: "plate foe" },
+  const arena = h("div", { class: "arena-wrap" }, c.arena.el, h("p", { class: "tap-hint" }, "Tap them"));
+  const plates = h("div", { class: "plates" },
+    h("div", { class: "plate me" },
+      h("div", { class: "name" }, "Slumbrock", h("small", {}, ` ${STAGE_NAMES[stage]}`)),
+      h("div", { class: "bar xp" }, h("i", { style: `width:${next === null ? 100 : Math.min(100, Math.round((xp / next) * 100))}%` })),
+      h("div", { class: "num" }, next === null ? `XP ${fmt(xp)} · MAX` : `XP ${fmt(xp)} / ${fmt(next)}`),
+    ),
+    h("div", { class: `plate foe ${day.outcome === "win" ? "caught" : ""}` },
       h("div", { class: "name" }, creature.name, h("small", {}, ` ${HABITAT_LABEL[creature.habitat]}`)),
       h("div", { class: "bar hp" }, h("i", { style: `width:${hpPct}%` })),
       h("div", { class: "num" }, day.goal === null ? "…" : day.outcome === "win" ? "CAUGHT" : `HP ${fmt(left)}`),
     ),
   );
-  const me = h("div", { class: "plate me" },
-    h("div", { class: "name" }, "Slumbrock", h("small", {}, ` ${STAGE_NAMES[stage]}`)),
-    h("div", { class: "bar xp" }, h("i", { style: `width:${next === null ? 100 : Math.min(100, Math.round((xp / next) * 100))}%` })),
-    h("div", { class: "num" }, next === null ? `XP ${fmt(xp)} · MAX` : `XP ${fmt(xp)} / ${fmt(next)}`),
-  );
-
   const bubble = h("div", { class: "bubble", role: "status" }, bubbleText(c, day));
   const statRow = h("div", { class: "stats" },
     h("div", {}, h("span", {}, "Speed"), h("div", { class: "bar sm" }, h("i", { style: `width:${Math.round(stats.speed * 100)}%` }))),
@@ -216,8 +215,12 @@ export function homeScreen(c: Controller): HTMLElement {
   );
   const flags = h("div", { class: "chips" });
   if (!xpRuleWritten()) flags.append(h("span", { class: "chip warn", title: "H4 is not written yet; a simple rule is in use." }, "XP: baseline rule"));
+  return h("section", { class: "stage", "aria-label": "Slumbrock" }, arena, plates, bubble, statRow, flags);
+}
 
-  root.append(arena, me, bubble, statRow, flags);
+export function homeScreen(c: Controller): HTMLElement {
+  const root = h("div", { class: "screen home" });
+  const day = c.day;
   if (c.say) root.append(h("p", { class: `say ${c.say.kind}`, role: "status" }, c.say.text));
   root.append(goalCard(c, day), stepsCard(c, day), trainCard(c));
   const chart = trendChart(c.s.days.map((d) => dayOf(c.s, d.date)!));
