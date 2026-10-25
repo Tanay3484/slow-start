@@ -53,7 +53,7 @@ Phone / browser ── app/ (TypeScript, Vite, canvas pixel art, localStorage)
 |---|---|---|
 | `STEP_START` | 1,500 | First goal for a new person |
 | `STEP_FLOOR` / `STEP_CEILING` | 1,000 / 20,000 | R1.9 |
-| `STEP_AI` | 250 | Steps added per met day above the threshold |
+| `STEP_AI` | 1,500 in the product (`SS_STEP_AI`), 250 in the contract tests | Steps added per met day above the threshold; chosen by a sweep, see section 6 |
 | `CAP_QUANTILE` | 0.30 | Cap is the 30th percentile, so about 7 days in 10 are reachable |
 | `CAP_MIN_DAYS` | 7 | History needed before TabPFN is used |
 | `PRIOR_ROWS` | tuned in T11 | Public rows added to a person's own rows |
@@ -136,6 +136,13 @@ cap, at the same goal level); repeat last; fixed plan (+2.5 kg or +1 rep). Each 
   reported as the alternative. TabPFN's hit rate stayed near the 70% target in both windows (68.0%,
   66.6%) while the plain percentile's swung (64.0%, 69.7%), which is suggestive of steadier calibration
   and nothing more, with two windows.
+- **The controller's step, and how it was chosen.** With your H1 controller and a 250-step climb, the
+  final window showed 86.6% of goals met at goal level 0.50: after each halving the climb back is so slow
+  that the goal sits at about half of a usual day. The step was swept (250 to 1,500) on the validation
+  window under a rule fixed before the sweep: the largest step whose validation goal-met rate stays at or
+  above 70%. That was 1,500, the top of the range tested (so a larger step might also pass). On the final
+  window it gives 71.1% at goal level 0.74, against 69.7% at 0.79 for the plain 30th percentile: a tie.
+  `results/steps.sweep.md`.
 - **Latency plan:** one prediction per person per day, cached in the app. `PRIOR_ROWS` is tuned so a
   call stays under about 8 s on the Render plan. The app shows "Slumbrock is waking up" while it waits.
 
@@ -220,4 +227,5 @@ None blocking.
 - 2026-10-23: Added the feature-set comparison and its outcome (section 6), a per-client rate limit on
   the routes that cost CPU, and measured the container: with no network, 1 CPU and a 2 GB limit, TabPFN
   loads in 2.9 s, a goal call takes about 5 s, and peak memory is 598 MB. The 512 MB plans cannot hold it.
-
+- 2026-10-25: The step per win is a setting (`SS_STEP_AI`, 1,500) chosen by a sweep on the validation
+  window; the deploy is web 1c-2g plus Gemma 4B on 2c-4g.

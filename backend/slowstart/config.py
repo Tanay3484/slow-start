@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     llm_num_thread: int | None = None
 
     # Steps cap (the "receiver window"). See specs/001-slow-start-mvp/design.md section 3.
+    # The controller's step per won day once it is near your level. 1,500 was chosen on a validation
+    # window by a rule fixed beforehand (results/steps.sweep.md); the contract tests use 250.
+    step_ai: int = 1500
     cap_quantile: float = 0.30
     cap_min_days: int = 7
     prior_rows: int = 400

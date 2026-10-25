@@ -5,7 +5,7 @@ ENV OLLAMA_HOST=0.0.0.0:11434 \
     OLLAMA_KEEP_ALIVE=-1 \
     OLLAMA_CONTEXT_LENGTH=2048 \
     OLLAMA_NUM_PARALLEL=1 \
-    MODEL=gemma3:1b
+    MODEL=gemma3:4b
 
 # Bake the model into the image so a restart never re-downloads it.
 RUN (ollama serve >/dev/null 2>&1 &) \
@@ -17,7 +17,7 @@ RUN (ollama serve >/dev/null 2>&1 &) \
 ENV OLLAMA_MAX_LOADED_MODELS=1 \
     LLAMA_ARG_CACHE_RAM=0 \
     LLAMA_ARG_NO_REPACK=1 \
-    LLAMA_ARG_THREADS=1
+    LLAMA_ARG_THREADS=2
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh

@@ -75,6 +75,28 @@ def main() -> int:
             },
         }
     SITE.parent.mkdir(parents=True, exist_ok=True)
+    chosen_path = RESULTS / "sweep" / "chosen.json"
+    if chosen_path.exists():
+        chosen = json.loads(chosen_path.read_text(encoding="utf-8"))["chosen"]
+        for label in ("validation", "final"):
+            run = json.loads(
+                (RESULTS / "sweep" / f"steps.{label}-ai{chosen}-v1.json").read_text(
+                    encoding="utf-8"
+                )
+            )
+            by = {r["policy"]: r for r in run["rows"]}
+            evidence[f"sweep_{label}"] = {
+                "step": chosen,
+                "policies": {
+                    k: {
+                        "goal_met": round(v["goal_met"], 4),
+                        "mean_goal": round(v["mean_goal"]),
+                        "goal_level": round(v["goal_level"], 3),
+                        "vs_p30": v["vs_baseline"],
+                    }
+                    for k, v in by.items()
+                },
+            }
     SITE.write_text(json.dumps(evidence, indent=1), encoding="utf-8")
     print("\n".join(lines))
     return 0

@@ -13,6 +13,9 @@ commit message.
 
 ## Your four tasks
 
+Status 2026-10-25: all four done. H1 and H3 written by Tanay from skeletons; H2 and H4 handed to Claude
+by Tanay to make the deadline.
+
 These are the project's core. Each is a pure function with a clear contract, 1–3 hours, and the app runs on
 a stub until it lands (`NotImplementedError` → the guard serves a baseline and the app shows a "fallback"
 badge). The contract tests are in `backend/tests/test_human_levels.py` and `app/src/game/xp.test.ts`; they
@@ -189,3 +192,5 @@ None blocking.
 ## Changelog
 
 - 2026-10-23: First draft.
+- 2026-10-25: H1 and H3 written by Tanay; H2 and H4 written by Claude at Tanay's request. T12 done
+  (four steps runs plus the step sweep), T24 deployed (web 1c-2g, Gemma 4B on 2c-4g).

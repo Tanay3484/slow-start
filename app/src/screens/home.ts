@@ -7,7 +7,7 @@ import type { DayRecord, Goal, Phase } from "../types";
 
 const PHASE_TEXT: Record<Phase, { chip: string; why: string }> = {
   slow_start: { chip: "Slow start", why: "The window doubles after every win, until the first miss tells it where your level is." },
-  cruising: { chip: "Cruising", why: "You are near your level now, so the window grows by a small fixed step after each win." },
+  cruising: { chip: "Cruising", why: "You are near your level now, so the window grows by a fixed 1,500 steps after each win, until a miss says stop." },
   recovering: { chip: "Recovering", why: "The last counted day was missed, so the window was halved. It never drops to zero." },
 };
 
