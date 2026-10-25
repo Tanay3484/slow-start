@@ -491,11 +491,21 @@ export class Arena {
     this.busyUntil = performance.now() + t0 + 900;
   }
 
-  private attack(dealt: number, goal: number, finishing: boolean): void {
+  /** An import landed. A stomp for show, with no damage: imported days are history, and only today's
+   *  steps ever take HP off today's creature. */
+  cheer(title: string, sub: string): void {
+    const delay = Math.max(0, this.busyUntil - performance.now()) + 300;
+    this.later(delay, () => {
+      this.say(title, sub, "#a7f070", 3000);
+      this.later(500, () => this.attack(0, 0, false, "HISTORY!"));
+    });
+  }
+
+  private attack(dealt: number, goal: number, finishing: boolean, label?: string): void {
     if (!this.foe) return;
     const foe = this.foe;
     const share = goal > 0 ? dealt / goal : 0.2;
-    const big = share >= 0.3;
+    const big = label !== undefined || share >= 0.3;
     this.busyUntil = performance.now() + 700;
     // Slumbrock lunges, the creature flinches
     this.tween(this.hero, "ox", 24, 130, easeIn);
@@ -515,8 +525,12 @@ export class Arena {
       this.burst(c.x - 10, c.y, big ? ["#ffffff", "#ffcd75", "#ef7d57"] : ["#ffffff", "#ffcd75"], big ? 22 : 12, big ? 1.4 : 1);
       this.burst(this.hero.x + 60, GROUND + 2, ["#c0cbdc"], 6, 0.4, -0.3);
       this.kick(big ? 4 : 2, big ? 320 : 180);
-      this.float(`-${dealt.toLocaleString("en-US")}`, c.x, c.y - 26, big ? "#ffcd75" : "#ffffff", big);
-      if (big) this.float("STOMP!", c.x - 8, c.y - 42, "#ef7d57", true, 1100);
+      if (label) {
+        this.float(label, c.x - 8, c.y - 14, "#a7f070", true, 1300);
+      } else {
+        this.float(`-${dealt.toLocaleString("en-US")}`, c.x, c.y - 26, big ? "#ffcd75" : "#ffffff", big);
+        if (big) this.float("STOMP!", c.x - 8, c.y - 42, "#ef7d57", true, 1100);
+      }
     });
     if (finishing) this.later(520, () => this.capture());
   }
