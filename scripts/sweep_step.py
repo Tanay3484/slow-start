@@ -48,8 +48,8 @@ def main() -> int:
         f"Rule, fixed before the sweep: the largest step whose validation goal-met rate (controller + "
         f"TabPFN cap) is at least {FLOOR:.0%}. Chosen: **{chosen} steps**.",
         "",
-        "| Step per win | Validation: goal met · mean goal · goal level (controller + cap) |",
-        "|---|---|",
+        "| Step per win | Validation goal met | Mean goal | Goal level |",
+        "|---|---|---|---|",
         *[
             f"| {ai}{' (chosen)' if ai == chosen else ''} | {row(val[ai]['controller_tabpfn_cap'])} |"
             for ai in STEPS

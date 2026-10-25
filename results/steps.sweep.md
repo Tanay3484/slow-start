@@ -2,8 +2,8 @@
 
 Rule, fixed before the sweep: the largest step whose validation goal-met rate (controller + TabPFN cap) is at least 70%. Chosen: **1500 steps**.
 
-| Step per win | Validation: goal met · mean goal · goal level (controller + cap) |
-|---|---|
+| Step per win | Validation goal met | Mean goal | Goal level |
+|---|---|---|---|
 | 250 | 88.4% | 3986 | 0.52 |
 | 500 | 83.5% | 4674 | 0.61 |
 | 750 | 80.3% | 5328 | 0.69 |
