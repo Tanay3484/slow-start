@@ -19,7 +19,7 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 
 from slowstart.controllers import exercise, policies
-from slowstart.models import ExerciseParams, Session, Target
+from slowstart.models import ExerciseParams, Session, SetResult, Target
 
 TargetPolicy = Callable[[Sequence[Session], str, ExerciseParams], Target]
 MIN_HISTORY = 3
@@ -72,6 +72,26 @@ def controller_is_written(params: ExerciseParams) -> bool:
     except Exception:  # written, maybe wrong; the tests will say
         return True
     return True
+
+
+def top_set(session: Session) -> SetResult | None:
+    """The heaviest working set (most reps on ties, and for bodyweight)."""
+    sets = policies.working_sets(session)
+    return max(sets, key=lambda s: (s.weight_kg or 0.0, s.reps), default=None)
+
+
+def top_set_params(
+    sessions: Sequence[Session], start: dt.date, params: ExerciseParams
+) -> ExerciseParams:
+    """R8.6: the same scheme, but one set at the person's usual top-set reps from before `start`."""
+    scheme = dict(params.scheme)
+    for ex, rows in group_sessions([s for s in sessions if s.date < start]).items():
+        if ex not in scheme:
+            continue
+        reps = sorted(t.reps for t in map(top_set, rows) if t)
+        if reps:
+            scheme[ex] = scheme[ex].model_copy(update={"sets": 1, "reps": reps[len(reps) // 2]})
+    return params.model_copy(update={"scheme": scheme})
 
 
 def group_sessions(sessions: Sequence[Session]) -> dict[str, list[Session]]:

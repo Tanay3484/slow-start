@@ -1,0 +1,76 @@
+name: Import problem
+description: An export that would not load, or loaded but shows the wrong numbers. Helps us teach the cleaner a new case.
+title: "[import] "
+labels: ["import"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks: every report like this becomes a rule (and a test) in the importer, so the next person's file just works.
+
+        **Please do not attach your full export.** It is your health data, and this issue is public. The fields below ask only for what we need.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What were you importing?
+      options:
+        - Steps
+        - Workouts
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Where did the file come from?
+      options:
+        - Google Fit (Google Takeout)
+        - Fitbit or Pixel Watch (Google Takeout)
+        - Samsung Health
+        - Apple Health
+        - Garmin
+        - Hevy
+        - Strong
+        - A CSV I made myself
+        - Something else (say below)
+    validations:
+      required: true
+  - type: input
+    id: file
+    attributes:
+      label: File name(s)
+      description: The name only, for example `Daily activity metrics.csv` or `steps-2026-09-01.json`.
+      placeholder: Daily activity metrics.csv
+  - type: textarea
+    id: app_said
+    attributes:
+      label: What the app said
+      description: Filled in for you when you came from the Data tab. Edit anything you like.
+      render: text
+  - type: textarea
+    id: what_wrong
+    attributes:
+      label: What looks wrong?
+      description: In your own words. For example "my goal is 1,500 but I walk 8,000 most days", "it says 200 days were not carried, I wore my watch every day", or "it refused the file".
+    validations:
+      required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: The first few lines of the file (optional)
+      description: The header row and two or three rows are usually enough to recognise a format. Change the numbers if you like; the column names and the date format are what matter.
+      render: text
+      placeholder: |
+        Date,Move Minutes count,Calories (kcal),Step count
+        2026-10-20,40,2100,4438
+  - type: input
+    id: devices
+    attributes:
+      label: Phone and watch (optional)
+      description: Which devices count your steps, for example "Pixel 9 Pro and Pixel Watch 3". Overlapping devices are the most common cause of odd totals.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: I have not attached or pasted my full export.
+          required: true

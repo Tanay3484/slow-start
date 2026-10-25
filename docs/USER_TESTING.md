@@ -4,6 +4,14 @@ What it takes to test Slow Start for real with your own steps and workouts, and 
 
 ## 1. Export your history (about 10 minutes of clicking; Takeout can take hours to arrive)
 
+The same steps, with pictures, are on the site at `/export`.
+
+### Steps from the phone (Google Fit)
+
+Google Takeout with only **Fit** ticked. Upload
+`Takeout/Fit/Daily activity metrics/Daily activity metrics.csv`: one row per day, already merged across
+phone and watch. Not the per-day files next to it, and not `All Data` (per-device streams that overlap).
+
 ### Steps from the Pixel Watch (Fitbit)
 
 1. On the phone, open the **Fitbit** app, then your profile picture.
@@ -34,7 +42,7 @@ Menu names change between app versions. If the folder looks different, put the w
    - **Import steps**: select all the `steps-*.json` files at once (or one CSV with `date,steps`).
    - **Import workouts**: select `hevy.csv`.
 3. The import reads the files on the server in memory and keeps nothing; the history is saved on the
-   device. Days with 0 steps are treated as "watch not worn".
+   device. Days under 500 steps count as "phone or watch not carried", never as a miss.
 
 Until the server is deployed, run it on the laptop (see the README) and open <http://localhost:8000/play>.
 To use it from the phone on the same Wi-Fi, start the server with `--host 0.0.0.0` and open

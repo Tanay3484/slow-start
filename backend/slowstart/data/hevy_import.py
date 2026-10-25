@@ -50,7 +50,8 @@ EXERCISE_PATTERNS: list[tuple[str, str]] = [
     ),
     (r"^push[- ]?ups?$", "push_up"),
     (r"^pull[- ]?ups?$", "pull_up"),
-    (r"^(tricep|triceps|chest)? ?dips?( \(.*\))?$", "dip"),
+    # Bodyweight moves are scored on reps alone, so assisted and weighted variants stay out.
+    (r"^(tricep|triceps|chest)? ?dips?$", "dip"),
 ]
 
 

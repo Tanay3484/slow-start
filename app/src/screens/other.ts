@@ -3,6 +3,7 @@ import type { Controller } from "../controller";
 import { h } from "../dom";
 import { ALL_IDS, CREATURES, HABITAT_LABEL } from "../game/creatures";
 import { xpRuleWritten } from "../game/rules";
+import { type ImportReport, issueUrl } from "../issue";
 
 // ---------------------------------------------------------------- Talk
 
@@ -106,11 +107,23 @@ export function dataScreen(c: Controller): HTMLElement {
   const root = h("div", { class: "screen" });
   const out = h("p", { class: "say info", role: "status" });
   out.hidden = true;
-  const show = (text: string, kind: "info" | "good" | "bad" = "info") => {
+  const issue = h("a", { target: "_blank", rel: "noopener" }, "Raise an issue on GitHub");
+  const help = h("p", { class: "meta issue-help" }, "Not sure, or the wrong numbers showing? ", issue, " and we will teach the cleaner your case. Only the file name and the message above go in; never the file.");
+  help.hidden = true;
+  const paint = (note: NonNullable<Controller["importNote"]>) => {
     out.hidden = false;
-    out.className = `say ${kind}`;
-    out.textContent = text;
+    out.className = `say ${note.kind}`;
+    out.textContent = note.text;
+    help.hidden = !note.report;
+    if (note.report) issue.setAttribute("href", issueUrl({ ...note.report, said: note.text }));
   };
+  const show = (text: string, kind: "info" | "good" | "bad" = "info", report?: Omit<ImportReport, "said">) => {
+    c.importNote = { text, kind, report };
+    paint(c.importNote);
+    if (!root.isConnected) c.onChange(); // an import redraws the screen; draw the new one with the note
+  };
+  if (c.importNote) paint(c.importNote);
+  const names = (input: HTMLInputElement) => [...(input.files ?? [])].map((f) => f.name);
 
   const stepsFile = h("input", { type: "file", accept: ".json,.csv,.txt", multiple: true, "aria-label": "Step files" });
   const hevyFile = h("input", { type: "file", accept: ".csv", "aria-label": "Hevy export" });
@@ -127,39 +140,41 @@ export function dataScreen(c: Controller): HTMLElement {
     root.append(
       h("section", { class: "card" },
         h("h2", {}, "Import steps"),
-        h("p", { class: "meta" }, "A Fitbit / Pixel Watch export from Google Takeout (the steps-*.json files), or any CSV with date and steps columns. Days with 0 steps are treated as the tracker not being worn."),
+        h("p", { class: "meta" }, "Google Fit's Daily activity metrics.csv, a Fitbit / Pixel Watch export (all the steps-*.json files), or any CSV with date and steps columns. Days under 500 steps count as the phone or watch not carried, never as a miss. ", h("a", { href: "./export.html#steps", target: "_blank" }, "How do I export?")),
         stepsFile,
         h("button", { class: "btn", onclick: async () => {
+          const report = { kind: "steps" as const, files: names(stepsFile) };
           try {
             show("Reading…");
             const texts = await readFiles(stepsFile);
             if (!texts.length) return show("Choose a file first.");
             const lines: string[] = [];
             for (const t of texts) lines.push(await c.importStepsFile(t));
-            show(lines.join(" "), "good");
+            show(lines.join(" "), "good", report);
           } catch (e) {
-            show(e instanceof Error ? e.message : "Could not read that file", "bad");
+            show(e instanceof Error ? e.message : "Could not read that file", "bad", report);
           }
         } }, "Import steps"),
       ),
       h("section", { class: "card" },
         h("h2", {}, "Import workouts"),
-        h("p", { class: "meta" }, "A Hevy CSV export (Profile, Settings, Export data). Only the main lifts, a few dumbbell lifts and bodyweight moves are used; warm-ups are skipped."),
+        h("p", { class: "meta" }, "A Hevy CSV export. Only the main lifts, a few dumbbell lifts and bodyweight moves are used; warm-ups, empty sets and assisted or weighted bodyweight variants are skipped. ", h("a", { href: "./export.html#hevy", target: "_blank" }, "How do I export?")),
         hevyFile,
         h("button", { class: "btn", onclick: async () => {
+          const report = { kind: "workouts" as const, files: names(hevyFile) };
           try {
             show("Reading…");
             const [text] = await readFiles(hevyFile);
             if (!text) return show("Choose a file first.");
-            show(await c.importHevyFile(text), "good");
+            show(await c.importHevyFile(text), "good", report);
           } catch (e) {
-            show(e instanceof Error ? e.message : "Could not read that file", "bad");
+            show(e instanceof Error ? e.message : "Could not read that file", "bad", report);
           }
         } }, "Import workouts"),
       ),
     );
   }
-  root.append(out);
+  root.append(out, help);
 
   root.append(
     h("section", { class: "card" },

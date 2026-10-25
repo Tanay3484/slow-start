@@ -3,7 +3,7 @@ import * as api from "./api";
 import { Arena } from "./art/arena";
 import persona from "./demo/persona.json";
 import { CREATURES, creatureFor } from "./game/creatures";
-import { addDays, dayOf, emptyDay, historyFor, settle, todayISO, totalXp, upsertDay, withOutcome } from "./game/day";
+import { HISTORY_DAYS, addDays, dayOf, emptyDay, historyFor, settle, todayISO, totalXp, upsertDay, withOutcome } from "./game/day";
 import { cellId, haversineM, isNewCell } from "./game/explore";
 import { stageOf } from "./game/rules";
 import { getPosition } from "./geo";
@@ -21,6 +21,12 @@ const NEAR_M = 400; // how close you must be to a place to log from it
 // The demo walks through every kind of place and time of day, so a first-time visitor sees them all.
 const DEMO_HABITATS: Habitat[] = ["park", "water", "street", "park", "gym", "water", "street"];
 const DEMO_HOURS = [10, 18, 21, 7, 13, 19, 22];
+const FORMAT_LABEL: Record<string, string> = {
+  google_fit_csv: "a Google Fit daily summary",
+  fitbit_takeout_json: "a Fitbit export",
+  fitabase_csv: "a Fitabase CSV",
+  csv: "a date and steps CSV",
+};
 
 export class Controller {
   readonly store: Store;
@@ -28,6 +34,8 @@ export class Controller {
   tab: Tab = "today";
   busy = "";
   say: Say = null;
+  /** The last import's message on the Data tab; kept here because an import redraws the screen. */
+  importNote: { text: string; kind: "info" | "good" | "bad"; report?: { kind: "steps" | "workouts"; files: string[] } } | null = null;
   health: api.Health | null = null;
   catalog: Record<string, ExerciseInfo> | null = null;
   targets = new Map<string, ExerciseGoal>();
@@ -289,8 +297,9 @@ export class Controller {
     });
     if (dayOf(this.s, today)?.steps === null) this.patchDay({ goal: null, window: null });
     await this.ensureGoal();
-    const note = imp.not_worn ? ` ${imp.not_worn} day(s) with 0 steps were treated as "tracker not worn".` : "";
-    return `Read ${imp.days.length} days (${imp.first} to ${imp.last}).${note}`;
+    const notes = imp.warnings.map((w) => ` ${w}.`).join("");
+    const kept = imp.days.length > HISTORY_DAYS ? ` Goals use the latest ${HISTORY_DAYS} days.` : "";
+    return `Read ${imp.days.length.toLocaleString("en")} days as ${FORMAT_LABEL[imp.format] ?? imp.format} (${imp.first} to ${imp.last}).${notes}${kept}`;
   }
 
   async importHevyFile(text: string): Promise<string> {

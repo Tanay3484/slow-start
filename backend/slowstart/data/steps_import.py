@@ -1,13 +1,22 @@
 """Read daily steps from the formats a person can realistically hand over (R3.1, R3.3).
 
-Three formats, detected from the content:
+Four formats, detected from the content:
 
 1. Fitbit / Google Takeout "Global Export Data" `steps-*.json`: a list of per-minute
    `{"dateTime": "MM/DD/YY HH:MM:SS", "value": "12"}` records, summed per day.
 2. Fitabase `dailyActivity_merged.csv` (the public Kaggle set): `Id, ActivityDate, TotalSteps`.
-3. Any CSV with a date column and a steps column (`date,steps`).
+3. Google Fit Takeout `Daily activity metrics.csv`: `Date, ..., Step count, ...`, one row per day,
+   already merged across the phone and the watch by Google. A blank step count is a day not recorded.
+4. Any CSV with a date column and a steps column (`date,steps`).
 
-A day with 0 steps is a tracker that was not worn, not a real zero, so it becomes missing and is counted.
+The same cleaning runs on every upload (it is what was done by hand to the first user's export):
+
+- A day under `MIN_STEPS` (500) is a phone or watch that was not carried, not a real day, so it becomes
+  missing and is counted. A blank Google Fit day is the same.
+- Files that are close but wrong (one Google Fit day in 15-minute slots, a raw per-device stream from
+  Google Fit's `All Data`, which overlaps the others) are refused with a message naming the right file.
+
+Days on or after today are dropped by the app, so a partial export day never counts as a miss.
 Everything is parsed in memory; nothing is stored (R3.4). Real Takeout layouts change between exports,
 so unrecognised input raises `ImportError_` with a message that says what was expected.
 """
@@ -24,6 +33,8 @@ from pydantic import BaseModel
 
 from slowstart.models import DayResult
 
+MIN_STEPS = 500  # under this, the phone or watch was not carried
+GOOGLE_FIT_FILE = "Takeout/Fit/Daily activity metrics/Daily activity metrics.csv"
 DATE_FORMATS = ("%Y-%m-%d", "%m/%d/%Y", "%m/%d/%y", "%d-%m-%Y", "%d %b %Y", "%b %d, %Y")
 
 
@@ -55,12 +66,16 @@ def parse_date(text: str) -> dt.date:
 
 
 def _finish(totals: dict[dt.date, int], fmt: str, warnings: list[str]) -> ImportedSteps:
-    days = [DayResult(date=d, steps=(s if s > 0 else None)) for d, s in sorted(totals.items())]
+    days = [
+        DayResult(date=d, steps=(s if s >= MIN_STEPS else None)) for d, s in sorted(totals.items())
+    ]
     not_worn = sum(1 for d in days if d.steps is None)
     if not days:
         raise ImportError_("No days found in that file")
     if not_worn:
-        warnings.append(f"{not_worn} day(s) with 0 steps were treated as 'tracker not worn'")
+        warnings.append(
+            f"{not_worn} day(s) under {MIN_STEPS} steps were treated as 'phone or watch not carried'"
+        )
     return ImportedSteps(
         days=days,
         format=fmt,
@@ -127,27 +142,44 @@ def _from_csv(text: str) -> ImportedSteps:
     if not rows:
         raise ImportError_("The file is empty")
     header = rows[0]
+    if _find(header, "start time") is not None and _find(header, "step count") is not None:
+        raise ImportError_(
+            "That is one day of Google Fit in 15-minute slots. Upload "
+            f"`{GOOGLE_FIT_FILE}` from the same export instead: it has every day."
+        )
     i_date = _find(header, "date", "activitydate", "day", "datetime", "timestamp")
-    i_steps = _find(header, "steps", "totalsteps", "step_count", "value")
+    i_steps = _find(header, "steps", "totalsteps", "step_count", "step count", "value")
     if i_date is None or i_steps is None:
         raise ImportError_("Expected a CSV with a date column and a steps column")
     i_id = _find(header, "id")
     if i_id is not None and len({r[i_id] for r in rows[1:] if len(r) > i_id}) > 1:
         raise ImportError_("That file has several people in it; import one person's steps")
+    google_fit = _find(header, "step count") is not None
     totals: dict[dt.date, int] = defaultdict(int)
     bad = 0
     for row in rows[1:]:
         try:
-            totals[parse_date(row[i_date])] += int(float(row[i_steps]))
+            cell = row[i_steps].strip()
+            totals[parse_date(row[i_date])] += int(float(cell)) if cell or not google_fit else 0
         except (IndexError, ValueError, ImportError_):
             bad += 1
     warnings = [f"{bad} row(s) could not be read and were skipped"] if bad else []
-    fmt = "fitabase_csv" if _find(header, "activitydate") is not None else "csv"
+    if google_fit:
+        fmt = "google_fit_csv"
+    elif _find(header, "activitydate") is not None:
+        fmt = "fitabase_csv"
+    else:
+        fmt = "csv"
     return _finish(totals, fmt, warnings)
 
 
 def parse_steps(text: str) -> ImportedSteps:
     body = text.lstrip("﻿").lstrip()
+    if body.startswith("{") and '"Data Points"' in body[:4000]:
+        raise ImportError_(
+            "That is one device's raw stream from Google Fit's `All Data` folder. Phone and watch "
+            f"streams overlap, so adding them counts steps twice. Upload `{GOOGLE_FIT_FILE}` instead."
+        )
     if body.startswith("["):
         return _from_takeout_json(body)
     return _from_csv(body)

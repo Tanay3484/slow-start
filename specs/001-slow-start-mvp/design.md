@@ -196,6 +196,11 @@ live backend for each goal, so a judge sees slow start, the cap and a halving in
   `results/cache/` so a rerun is quick.
 - `evaluate_training.py`: from a Hevy CSV, split by date, last 3 months scored; `results/private/`
   holds anything derived from personal data, and only aggregate numbers go to `results/training.md`.
+  **Finding (2026-10-26):** on Tanay's log (top sets and pyramids, 1 to 6 reps) the fixed scheme (3 x 8 at
+  one weight) is almost never done, so repeat-last met 0% and the controller cut to 12% of the lifted
+  weight. **Top-set scoring (R8.6, exploratory):** each exercise's spec becomes 1 set at R reps, where R is
+  the median reps of the heaviest working set (most reps, for bodyweight) over sessions before the window.
+  The same three policies run on it unchanged; only the scheme differs.
 - `tests/test_no_lookahead.py`: a policy wrapper that raises if it is handed a day on or after the day
   it sets a goal for (R8.3).
 

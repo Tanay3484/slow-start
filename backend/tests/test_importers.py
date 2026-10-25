@@ -10,23 +10,31 @@ from slowstart.data.steps_import import ImportError_, parse_steps, people_in_fit
 
 def test_takeout_minute_records_are_summed_per_day():
     rows = [
-        {"dateTime": "10/01/26 00:00:00", "value": "100"},
+        {"dateTime": "10/01/26 00:00:00", "value": "1000"},
         {"dateTime": "10/01/26 00:01:00", "value": "20"},
         {"dateTime": "10/02/26 07:30:00", "value": "5000"},
     ]
     out = parse_steps(json.dumps(rows))
     assert out.format == "fitbit_takeout_json"
     assert [(d.date, d.steps) for d in out.days] == [
-        (dt.date(2026, 10, 1), 120),
+        (dt.date(2026, 10, 1), 1020),
         (dt.date(2026, 10, 2), 5000),
     ]
 
 
-def test_zero_step_days_are_not_worn_and_counted():
-    out = parse_steps("date,steps\n2026-10-01,0\n2026-10-02,4000\n2026-10-03,0\n")
+def test_days_under_min_steps_are_not_carried_and_counted():
+    out = parse_steps("date,steps\n2026-10-01,0\n2026-10-02,4000\n2026-10-03,499\n2026-10-04,500\n")
     assert out.not_worn == 2
-    assert [d.steps for d in out.days] == [None, 4000, None]
-    assert any("not worn" in w for w in out.warnings)
+    assert [d.steps for d in out.days] == [None, 4000, None, 500]
+    assert any("not carried" in w for w in out.warnings)
+
+
+def test_near_miss_google_fit_files_are_refused_with_the_right_file_named():
+    slots = "Start time,End time,Move Minutes count,Step count\n00:00:00.000+05:30,00:15:00.000+05:30,,12\n"
+    raw = json.dumps({"Data Source": "derived:com.google.step_count.delta", "Data Points": []})
+    for text in (slots, raw):
+        with pytest.raises(ImportError_, match="Daily activity metrics.csv"):
+            parse_steps(text)
 
 
 def test_fitabase_daily_activity():
@@ -34,6 +42,20 @@ def test_fitabase_daily_activity():
     out = parse_steps(text)
     assert out.format == "fitabase_csv"
     assert out.first == dt.date(2016, 3, 12) and out.days[1].steps == 10735
+
+
+def test_google_fit_daily_activity_metrics():
+    text = (
+        "Date,Move Minutes count,Calories (kcal),Distance (m),Step count,Average weight (kg)\n"
+        "2026-10-20,40,2100,3100,4438,\n"
+        "2026-10-21,12,1900,,,\n"
+        "2026-10-22,61,2300,5800,7922,\n"
+    )
+    out = parse_steps(text)
+    assert out.format == "google_fit_csv"
+    assert [d.steps for d in out.days] == [4438, None, 7922]
+    assert out.not_worn == 1
+    assert not any("could not be read" in w for w in out.warnings)
 
 
 def test_a_file_with_several_people_is_refused_for_a_single_import():
@@ -98,6 +120,11 @@ def test_hevy_rejects_other_csvs():
         ("Push Up", "push_up"),
         ("Pull Up", "pull_up"),
         ("Triceps Dip", "dip"),
+        ("Chest Dip", "dip"),
+        ("Chest Dip (Assisted)", None),
+        ("Chest Dip (Weighted)", None),
+        ("Pull Up (Assisted)", None),
+        ("Pull Up (Weighted)", None),
         ("Leg Press", None),
     ],
 )
