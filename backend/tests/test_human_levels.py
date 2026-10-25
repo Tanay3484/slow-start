@@ -190,6 +190,15 @@ def test_H3_bootstrap_interval_brackets_the_difference_and_is_repeatable():
     assert lo <= diff <= hi and diff == pytest.approx(sum(a) / 12 - sum(b) / 12)
 
 
+def test_H3_bootstrap_handles_people_with_different_numbers_of_days():
+    # Real data: one person logged two days, another three. The resample must still be a flat set of days.
+    a = [1, 1, 0, 1, 0]
+    b = [0, 1, 0, 0, 0]
+    diff, lo, hi = locked(paired_bootstrap, a, b, list("aabbb"), 300, 1)
+    assert diff == pytest.approx(3 / 5 - 1 / 5)
+    assert lo <= diff <= hi
+
+
 @pytest.mark.parametrize(
     ("a", "b", "g"), [([1], [1, 0], ["a"]), ([], [], []), ([1, 0], [1, 0], ["a"])]
 )
