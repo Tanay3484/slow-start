@@ -98,6 +98,38 @@ weights from Hugging Face on first use.
   tests and a mocked end-to-end run, not by a live one. The app degrades to "no suggestions".
 - The Android build is a debug-signed APK, installed by hand.
 
+## After the deadline
+
+The entry was submitted on 2026-10-26 (the deadline was 2026-10-25, 23:59 PDT). The project as judged
+is the `main` branch up to [`f1528e7`](https://github.com/Tanay3484/slow-start/commit/f1528e7) (release
+v0.2.0). Every change after that is listed here with its date.
+
+**Changed after the deadline**
+
+- 2026-10-26: this section of the README. No code has changed.
+
+**Planned, to be built once Week 3's winners are announced**
+
+From reader feedback on the DEV post (thanks to
+[@ahmedznouda](https://dev.to/ahmedznouda/comment/3j157), who found all three):
+
+- **Keep excused days out of TabPFN's features.** The controller already ignores a sick day, but its
+  steps still reach the predictor's features (last three days, weekly minimum, fortnight median). A week
+  of flu keeps the cap low after the window was protected. Excused days should be dropped from the
+  features, as "not carried" days already are.
+- **"I don't feel great today" should excuse the day.** The excuse word list needs phrases with no sick
+  word in them.
+- **"Was sick last week, back at it today" should not.** Sickness in the past tense must not excuse
+  today. Both sentences become tests.
+
+A feedback form in the app:
+
+- **Report a bug or ask for a feature without a GitHub account.** A form in the game (type, title,
+  description, and an optional GitHub username to be tagged when it is fixed) is posted as an issue by a
+  bot account. The bot's token can only open issues; a GitHub Action applies the labels `type/bug`,
+  `type/feature-request` or `type/data-bug`. The form is rate-limited, strips email addresses, and warns
+  that the issue is public.
+
 ## Credits
 
 - **Golden Hour** (same author, Week 1, MIT): the Ollama client pattern and the OpenStreetMap place
